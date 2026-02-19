@@ -11,7 +11,18 @@
 <title>LIFT — Training & Nutrition</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lift_theme')||'dark');</script>
+<script>
+(function(){
+  var t=localStorage.getItem('lift_theme')||'dark';
+  var themes={
+    dark:{'--bg':'#0e0e0e','--surface':'#141414','--card':'#1a1a1a','--border':'#272727','--border2':'#3a3a3a','--text':'#efefef','--muted':'#5a5a5a','--muted2':'#888','--input-bg':'#141414','--accent':'#e8ff47','--accent2':'#ff6b35','--push':'#3b82f6','--pull':'#10b981','--full':'#f59e0b','--diet':'#c084fc','--weight':'#fb7185','--exlog':'#34d399','--blue':'#60a5fa','--danger':'#ef4444'},
+    light:{'--bg':'#f0f0ec','--surface':'#e4e4e0','--card':'#ffffff','--border':'#d4d4d0','--border2':'#b8b8b4','--text':'#111111','--muted':'#888888','--muted2':'#555555','--input-bg':'#f8f8f6','--accent':'#5a8a00','--accent2':'#d4460a','--push':'#2563eb','--pull':'#059669','--full':'#d97706','--diet':'#9333ea','--weight':'#e11d48','--exlog':'#059669','--blue':'#2563eb','--danger':'#dc2626'}
+  };
+  var vars=themes[t]||themes.dark;
+  var root=document.documentElement;
+  Object.keys(vars).forEach(function(k){root.style.setProperty(k,vars[k]);});
+})();
+</script>
 <style>
 :root{--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;
 /* Dark theme defaults - overridden by html[data-theme] below */
@@ -358,19 +369,7 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 .ob-plan-stat-label{font-size:11px;color:var(–muted);margin-bottom:1px;}
 .ob-plan-stat-val{font-family:‘Bebas Neue’,sans-serif;font-size:20px;color:var(–accent);line-height:1;}
 
-/* THEME - html[data-theme] has specificity (0,1,1) which beats :root (0,1,0) */
-html[data-theme=“light”]{
-–bg:#f0f0ec;–surface:#e4e4e0;–card:#ffffff;–border:#d4d4d0;–border2:#b8b8b4;
-–text:#111111;–muted:#888888;–muted2:#555555;–input-bg:#f8f8f6;
-–accent:#5a8a00;–accent2:#d4460a;–push:#2563eb;–pull:#059669;–full:#d97706;
-–diet:#9333ea;–weight:#e11d48;–exlog:#059669;–blue:#2563eb;–danger:#dc2626;
-}
-html[data-theme=“dark”]{
-–bg:#0e0e0e;–surface:#141414;–card:#1a1a1a;–border:#272727;–border2:#3a3a3a;
-–text:#efefef;–muted:#5a5a5a;–muted2:#888;–input-bg:#141414;
-–accent:#e8ff47;–accent2:#ff6b35;–push:#3b82f6;–pull:#10b981;–full:#f59e0b;
-–diet:#c084fc;–weight:#fb7185;–exlog:#34d399;–blue:#60a5fa;–danger:#ef4444;
-}
+/* THEME - variables injected directly to :root via JS in setTheme() */
 body{transition:background .3s,color .3s;}
 
 /* MODAL */
@@ -1126,7 +1125,7 @@ function showView(v){
     document.getElementById('settingsEmail').textContent=e;
     const cal=state.prefs.cal_goal||2000;
     document.getElementById('settingsCalGoal').value=cal;
-    const t=document.documentElement.getAttribute('data-theme')||'dark';
+    const t=localStorage.getItem('lift_theme')||'dark';
     document.getElementById('themeDark').classList.toggle('active',t==='dark');
     document.getElementById('themeLight').classList.toggle('active',t==='light');
   }
@@ -1270,16 +1269,30 @@ function showAchievementToast(name){
 }
 
 // THEME
+const THEMES={
+  dark:{
+    '--bg':'#0e0e0e','--surface':'#141414','--card':'#1a1a1a','--border':'#272727',
+    '--border2':'#3a3a3a','--text':'#efefef','--muted':'#5a5a5a','--muted2':'#888',
+    '--input-bg':'#141414','--accent':'#e8ff47','--accent2':'#ff6b35','--push':'#3b82f6',
+    '--pull':'#10b981','--full':'#f59e0b','--diet':'#c084fc','--weight':'#fb7185',
+    '--exlog':'#34d399','--blue':'#60a5fa','--danger':'#ef4444'
+  },
+  light:{
+    '--bg':'#f0f0ec','--surface':'#e4e4e0','--card':'#ffffff','--border':'#d4d4d0',
+    '--border2':'#b8b8b4','--text':'#111111','--muted':'#888888','--muted2':'#555555',
+    '--input-bg':'#f8f8f6','--accent':'#5a8a00','--accent2':'#d4460a','--push':'#2563eb',
+    '--pull':'#059669','--full':'#d97706','--diet':'#9333ea','--weight':'#e11d48',
+    '--exlog':'#059669','--blue':'#2563eb','--danger':'#dc2626'
+  }
+};
 function setTheme(t){
-  document.documentElement.setAttribute('data-theme',t);
+  const vars=THEMES[t]||THEMES.dark;
+  const root=document.documentElement;
+  Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
   localStorage.setItem('lift_theme',t);
-  document.getElementById('themeDark').classList.toggle('active',t==='dark');
-  document.getElementById('themeLight').classList.toggle('active',t==='light');
-  // Update splash logo colour for light mode legibility
-  const splashLogo=document.querySelector('#splashCover > div:first-child');
-  if(splashLogo)splashLogo.style.color=t==='light'?'#5a8a00':'#e8ff47';
-  const splashSub=document.querySelector('#splashCover > div:last-child');
-  if(splashSub)splashSub.style.color=t==='light'?'#888':'#5a5a5a';
+  const isDark=t==='dark';
+  document.getElementById('themeDark').classList.toggle('active',isDark);
+  document.getElementById('themeLight').classList.toggle('active',!isDark);
 }
 // SETTINGS SYNC
 function syncCalGoalFromSettings(){
