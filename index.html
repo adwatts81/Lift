@@ -900,9 +900,9 @@ body{transition:background .3s,color .3s;}
 <script>
 const SUPA_URL='https://xswragxhltdsrlqigkwx.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzd3JhZ3hobHRkc3JscWlna3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzMxOTEsImV4cCI6MjA4NzAwOTE5MX0.aHlixcwUSAwoFPV9ro19hFB5L89lfhiXkvNu9b-jXhI';
-let sb;
+let sb=null;
 try { sb=supabase.createClient(SUPA_URL,SUPA_KEY); }
-catch(e) { console.error('Supabase failed to load',e); document.body.innerHTML='<div style="padding:40px;color:#fff;font-family:sans-serif;background:#0e0e0e;min-height:100vh"><h2>⚠️ Loading error</h2><p style="color:#888;margin-top:12px;">Could not connect. Please check your internet connection and reload the page.</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#e8ff47;color:#000;border:none;border-radius:8px;font-size:14px;cursor:pointer;">Reload</button></div>'; throw e; }
+catch(e) { console.error('Supabase init failed — check internet connection',e); }
 let currentUser=null;
 let state={foodLog:[],weightLog:[],exerciseLog:[],prefs:{cal_goal:2000,water:0,current_weight:'',target_weight:''},foodHistory:[],exerciseHistory:[]};
 
@@ -1822,16 +1822,20 @@ document.getElementById('loginEmail').addEventListener('keydown',e=>{if(e.key===
 
 // INIT
 (async()=>{
+  addIngredient();
+  if(!sb){
+    document.getElementById('splashCover').style.display='none';
+    alert('Could not connect to server. Please check your internet connection and reload.');
+    return;
+  }
   const{data:{session}}=await sb.auth.getSession();
   if(session?.user){
     onSignedIn(session.user);
   } else {
-    // No session — show auth screen, hide splash
     document.getElementById('splashCover').style.display='none';
   }
-  addIngredient();
 })();
-sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;}});
+if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;}});
 </script>
 
 </body>
