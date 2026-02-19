@@ -1263,18 +1263,36 @@ async function onSignedIn(user){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('userAvatar').textContent=user.email.slice(0,2).toUpperCase();
   document.getElementById('udEmail').textContent=user.email;
-  // Check onboarding BEFORE revealing the app
-  const{data:profile}=await sb.from('user_profile').select('onboarded').eq('user_id',user.id).single();
-  if(!profile||!profile.onboarded){
-    // Show onboarding — splash hides behind it
+
+  // Safety net — splash ALWAYS hides within 5 seconds no matter what
+  const splashTimeout=setTimeout(()=>{
     document.getElementById('splashCover').style.display='none';
-    startOnboarding();
-  } else {
-    // Reveal app, then load data
+    document.body.classList.add('authed');
+  },5000);
+
+  try{
+    // Race profile check against 4s timeout
+    const profilePromise=sb.from('user_profile').select('onboarded').eq('user_id',user.id).single();
+    const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000));
+    let profile=null;
+    try{const res=await Promise.race([profilePromise,timeoutPromise]);profile=res.data;}catch(e){profile=null;}
+
+    clearTimeout(splashTimeout);
+    document.getElementById('splashCover').style.display='none';
+
+    if(!profile||!profile.onboarded){
+      startOnboarding();
+    } else {
+      document.body.classList.add('authed');
+      loadAllData();
+      showInstallPrompt();
+    }
+  }catch(e){
+    clearTimeout(splashTimeout);
+    console.error('onSignedIn error:',e);
     document.getElementById('splashCover').style.display='none';
     document.body.classList.add('authed');
     loadAllData();
-    showInstallPrompt();
   }
 }
 
@@ -1395,20 +1413,30 @@ async function loadAllData(){
   setSyncStatus('syncing');
   try{
     const today=todayKey();
+    // Load each table independently so one failure doesn't block everything
+    const safe=p=>p.catch(()=>({data:null}));
     const[food,weight,exercise,prefs,foodHistory,exerciseHistory]=await Promise.all([
-      sb.from('food_log').select('*').eq('user_id',currentUser.id).eq('date',today).order('created_at'),
-      sb.from('weight_log').select('*').eq('user_id',currentUser.id).order('date'),
-      sb.from('exercise_log').select('*').eq('user_id',currentUser.id).eq('date',today).order('created_at'),
-      sb.from('user_prefs').select('*').eq('user_id',currentUser.id).single(),
-      sb.from('food_log').select('date').eq('user_id',currentUser.id).order('date',{ascending:false}).limit(200),
-      sb.from('exercise_log').select('date').eq('user_id',currentUser.id).order('date',{ascending:false}).limit(200),
+      safe(sb.from('food_log').select('*').eq('user_id',currentUser.id).eq('date',today).order('created_at')),
+      safe(sb.from('weight_log').select('*').eq('user_id',currentUser.id).order('date')),
+      safe(sb.from('exercise_log').select('*').eq('user_id',currentUser.id).eq('date',today).order('created_at')),
+      safe(sb.from('user_prefs').select('*').eq('user_id',currentUser.id).single()),
+      safe(sb.from('food_log').select('date').eq('user_id',currentUser.id).order('date',{ascending:false}).limit(200)),
+      safe(sb.from('exercise_log').select('date').eq('user_id',currentUser.id).order('date',{ascending:false}).limit(200)),
     ]);
-    state.foodLog=food.data||[];state.weightLog=weight.data||[];state.exerciseLog=exercise.data||[];
+    state.foodLog=food.data||[];
+    state.weightLog=weight.data||[];
+    state.exerciseLog=exercise.data||[];
     state.foodHistory=[...new Set((foodHistory.data||[]).map(r=>r.date))];
     state.exerciseHistory=[...new Set((exerciseHistory.data||[]).map(r=>r.date))];
     if(prefs.data)state.prefs={...state.prefs,...prefs.data};
-    setSyncStatus('ok');applyPrefs();updateDashboard();renderFoodLog();renderExerciseLog();renderWeightLog();initWater();updateStreaksAndAchievements();initStrava();
-  }catch(e){setSyncStatus('error');}
+    setSyncStatus('ok');
+    applyPrefs();updateDashboard();renderFoodLog();renderExerciseLog();renderWeightLog();initWater();updateStreaksAndAchievements();initStrava();
+  }catch(e){
+    console.error('loadAllData error:',e);
+    setSyncStatus('error');
+    // Still render the UI even if data failed
+    try{applyPrefs();updateDashboard();renderFoodLog();}catch(e2){}
+  }
 }
 function applyPrefs(){
   document.getElementById('calGoalInput').value=state.prefs.cal_goal||2000;
@@ -2521,11 +2549,20 @@ document.getElementById(‘splashCover’).style.display=‘none’;
 alert(‘Could not connect to server. Please check your internet connection and reload.’);
 return;
 }
-const{data:{session}}=await sb.auth.getSession();
+// Race getSession against a 6s timeout so we never hang forever
+try{
+const sessionPromise=sb.auth.getSession();
+const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error(‘session timeout’)),6000));
+const{data:{session}}=await Promise.race([sessionPromise,timeoutPromise]);
 if(session?.user){
 onSignedIn(session.user);
 } else {
 document.getElementById(‘splashCover’).style.display=‘none’;
+}
+}catch(e){
+console.error(‘Session check failed:’,e);
+document.getElementById(‘splashCover’).style.display=‘none’;
+// Show auth screen so user can sign in manually
 }
 })();
 if(sb)sb.auth.onAuthStateChange((event)=>{if(event===‘SIGNED_OUT’){currentUser=null;}});
