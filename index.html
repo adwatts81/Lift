@@ -913,14 +913,23 @@ function toggleUserMenu(){document.getElementById('userDropdown').classList.togg
 document.addEventListener('click',e=>{if(!e.target.closest('.user-menu'))document.getElementById('userDropdown').classList.remove('show');});
 async function onSignedIn(user){
   currentUser=user;
-  document.getElementById('authScreen').classList.add('hidden');document.body.classList.add('authed');document.getElementById('splashCover').style.display='none';
+  document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('userAvatar').textContent=user.email.slice(0,2).toUpperCase();
   document.getElementById('udEmail').textContent=user.email;
-  renderWeekSched(); // now currentUser is set, rotation uses join date
-  // Check if user has completed onboarding
+  renderWeekSched();
+  // Check onboarding BEFORE revealing the app
   const{data:profile}=await sb.from('user_profile').select('onboarded').eq('user_id',user.id).single();
-  if(!profile||!profile.onboarded){ startOnboarding(); }
-  else{ loadAllData(); showInstallPrompt(); }
+  if(!profile||!profile.onboarded){
+    // Show onboarding — splash hides behind it
+    document.getElementById('splashCover').style.display='none';
+    startOnboarding();
+  } else {
+    // Reveal app, then load data
+    document.getElementById('splashCover').style.display='none';
+    document.body.classList.add('authed');
+    loadAllData();
+    showInstallPrompt();
+  }
 }
 
 // ONBOARDING
@@ -1025,7 +1034,7 @@ function showPlanResult(plan){
     </div>
     <div class="ob-nav" style="margin-top:4px;"><button class="ob-next" onclick="finishOnboarding()">Start Training 🚀</button></div>`;
 }
-function finishOnboarding(){document.getElementById('onboardScreen').classList.remove('show');applyPrefs();loadAllData();showInstallPrompt();}
+function finishOnboarding(){document.getElementById('onboardScreen').classList.remove('show');document.body.classList.add('authed');applyPrefs();loadAllData();showInstallPrompt();}
 
 
 function setSyncStatus(s){
