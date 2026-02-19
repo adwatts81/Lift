@@ -11,8 +11,9 @@
 <title>LIFT — Training & Nutrition</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lift_theme')||'dark');</script>
 <style>
-:root{--bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;}
+:root{--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;--bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;transition:background .2s,color .2s;}
@@ -1119,8 +1120,7 @@ function showView(v){
     document.getElementById('settingsEmail').textContent=e;
     const cal=state.prefs.cal_goal||2000;
     document.getElementById('settingsCalGoal').value=cal;
-    // Sync theme buttons
-    const t=localStorage.getItem('lift_theme')||'dark';
+    const t=document.documentElement.getAttribute('data-theme')||'dark';
     document.getElementById('themeDark').classList.toggle('active',t==='dark');
     document.getElementById('themeLight').classList.toggle('active',t==='light');
   }
@@ -1275,9 +1275,6 @@ function setTheme(t){
   const splashSub=document.querySelector('#splashCover > div:last-child');
   if(splashSub)splashSub.style.color=t==='light'?'#888':'#5a5a5a';
 }
-// Apply saved theme immediately
-(()=>{const t=localStorage.getItem('lift_theme')||'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('themeDark')&&document.getElementById('themeDark').classList.toggle('active',t==='dark');document.getElementById('themeLight')&&document.getElementById('themeLight').classList.toggle('active',t==='light');})();
-
 // SETTINGS SYNC
 function syncCalGoalFromSettings(){
   const v=parseInt(document.getElementById('settingsCalGoal').value)||2000;
