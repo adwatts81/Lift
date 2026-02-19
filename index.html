@@ -13,7 +13,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('lift_theme')||'dark');</script>
 <style>
-:root{--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;--bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;}
+:root{--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;
+/* Dark theme defaults - overridden by html[data-theme] below */
+--bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;transition:background .2s,color .2s;}
@@ -189,7 +191,7 @@ textarea{resize:none;}
 .water-title{font-size:12px;font-weight:500;}.water-count{font-family:‘Bebas Neue’,sans-serif;font-size:21px;color:var(–blue);}
 .water-glasses{display:flex;gap:5px;flex-wrap:wrap;}
 .glass-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(–border);background:var(–surface);cursor:pointer;font-size:16px;transition:all .15s;display:flex;align-items:center;justify-content:center;}
-.glass-btn.filled{background:#1e3a5f;border-color:var(–blue);}
+.glass-btn.filled{background:rgba(96,165,250,.2);border-color:var(–blue);}
 .tabs{display:flex;gap:5px;margin-bottom:12px;}
 .tab{flex:1;background:var(–card);border:1px solid var(–border);border-radius:8px;padding:7px 4px;font-size:10px;font-weight:500;color:var(–muted);cursor:pointer;text-align:center;transition:all .15s;}
 .tab.active{background:var(–surface);border-color:var(–border2);color:var(–text);}
@@ -356,14 +358,14 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 .ob-plan-stat-label{font-size:11px;color:var(–muted);margin-bottom:1px;}
 .ob-plan-stat-val{font-family:‘Bebas Neue’,sans-serif;font-size:20px;color:var(–accent);line-height:1;}
 
-/* THEME */
-[data-theme=“light”]{
+/* THEME - html[data-theme] has specificity (0,1,1) which beats :root (0,1,0) */
+html[data-theme=“light”]{
 –bg:#f0f0ec;–surface:#e4e4e0;–card:#ffffff;–border:#d4d4d0;–border2:#b8b8b4;
 –text:#111111;–muted:#888888;–muted2:#555555;–input-bg:#f8f8f6;
 –accent:#5a8a00;–accent2:#d4460a;–push:#2563eb;–pull:#059669;–full:#d97706;
 –diet:#9333ea;–weight:#e11d48;–exlog:#059669;–blue:#2563eb;–danger:#dc2626;
 }
-[data-theme=“dark”]{
+html[data-theme=“dark”]{
 –bg:#0e0e0e;–surface:#141414;–card:#1a1a1a;–border:#272727;–border2:#3a3a3a;
 –text:#efefef;–muted:#5a5a5a;–muted2:#888;–input-bg:#141414;
 –accent:#e8ff47;–accent2:#ff6b35;–push:#3b82f6;–pull:#10b981;–full:#f59e0b;
@@ -666,7 +668,7 @@ body{transition:background .3s,color .3s;}
     <div class="ds-box wat-box"><div class="dsv" id="dietWaterCount">0/8</div><div class="dsl">water</div></div>
   </div>
   <div class="calorie-goal-bar">
-    <div class="cg-header"><span class="cg-title">Daily Calorie Goal</span><div class="cg-edit"><input class="cg-input" type="number" id="calGoalInput" value="2000" onchange="savePrefs()"><span class="cg-label">kcal</span></div></div>
+    <div class="cg-header"><span class="cg-title">Daily Calorie Goal</span><div class="cg-edit"><input class="cg-input" type="number" id="calGoalInput" value="2000" onchange="syncCalGoal()"><span class="cg-label">kcal</span></div></div>
     <div class="goalbar"><div class="goalbar-fill" id="goalbarFill" style="width:0%"></div></div>
     <div class="goalbar-labels"><span id="glLeft">2000 remaining</span><span id="glPct">0%</span></div>
   </div>
@@ -791,6 +793,10 @@ body{transition:background .3s,color .3s;}
     </div>
     <div class="ex-field" style="margin-bottom:8px;"><label>Avg Heart Rate (bpm, optional)</label><input type="number" id="exHR" placeholder="145"></div>
     <div class="ex-field" style="margin-bottom:8px;"><label>Notes</label><textarea id="exNotes" rows="2" placeholder="e.g. Hilly loop through Richmond Park"></textarea></div>
+    <div class="ex-field" style="margin-bottom:8px;">
+      <label>Calories Burned <span style="color:var(--muted);font-weight:300;">(optional — leave blank for AI estimate)</span></label>
+      <input type="number" id="exManualCals" placeholder="e.g. 650" min="1">
+    </div>
     <div class="thinking" id="exThinking"><div class="spinner spinner-ex"></div>AI estimating calorie burn...</div>
     <button class="btn btn-ex btn-block" onclick="logExercise()">Log Session</button>
   </div>
@@ -1624,12 +1630,28 @@ let exType='🚴 Cycling',effort='Easy';
 function setExType(t,btn){exType=t;document.querySelectorAll('.ex-type-btn').forEach(el=>el.classList.remove('active'));btn.classList.add('active');}
 function setEffort(e,btn){effort=e;document.querySelectorAll('.effort-btn').forEach(el=>el.classList.remove('active'));btn.classList.add('active');}
 async function logExercise(){
-  const duration=document.getElementById('exDuration').value,distance=document.getElementById('exDistance').value,hr=document.getElementById('exHR').value,notes=document.getElementById('exNotes').value;
+  const duration=document.getElementById('exDuration').value,distance=document.getElementById('exDistance').value,hr=document.getElementById('exHR').value,notes=document.getElementById('exNotes').value,manualCals=document.getElementById('exManualCals').value;
   if(!duration){alert('Enter duration');return;}
-  document.getElementById('exThinking').classList.add('show');
   const desc=`${exType}, ${duration} mins${distance?' '+distance+'km':''}${hr?', avg HR '+hr+'bpm':''}, effort: ${effort}. Notes: ${notes||'none'}`;
-  try{const raw=await callClaude(`Sports scientist. Estimate calorie burn for fit male endurance athlete: ${desc}. Respond ONLY valid JSON: {"cals_burned":number,"description":"short session summary"}`);const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());const entry={user_id:currentUser.id,date:todayKey(),type:exType,duration:parseInt(duration),distance:distance?parseFloat(distance):null,hr:hr?parseInt(hr):null,effort,notes,cals:parsed.cals_burned,description:parsed.description};setSyncStatus('syncing');const{data}=await sb.from('exercise_log').insert(entry).select().single();if(data)state.exerciseLog.push(data);setSyncStatus('ok');renderExerciseLog();updateOverview();updateStreaksAndAchievements();document.getElementById('exDuration').value='';document.getElementById('exDistance').value='';document.getElementById('exHR').value='';document.getElementById('exNotes').value='';}catch(e){alert('Could not estimate. Try again.');}
-  document.getElementById('exThinking').classList.remove('show');
+  let cals,description;
+  if(manualCals&&parseInt(manualCals)>0){
+    cals=parseInt(manualCals);
+    description=`${exType} · ${duration} min${distance?' · '+distance+'km':''}${hr?' · '+hr+'bpm':''} · ${effort}`;
+  } else {
+    document.getElementById('exThinking').classList.add('show');
+    try{
+      const raw=await callClaude(`Sports scientist. Estimate calorie burn for fit male endurance athlete: ${desc}. Respond ONLY valid JSON: {"cals_burned":number,"description":"short session summary"}`);
+      const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      cals=parsed.cals_burned;description=parsed.description;
+    }catch(e){alert('Could not estimate. Try again or enter calories manually.');document.getElementById('exThinking').classList.remove('show');return;}
+    document.getElementById('exThinking').classList.remove('show');
+  }
+  const entry={user_id:currentUser.id,date:todayKey(),type:exType,duration:parseInt(duration),distance:distance?parseFloat(distance):null,hr:hr?parseInt(hr):null,effort,notes,cals,description};
+  setSyncStatus('syncing');
+  const{data}=await sb.from('exercise_log').insert(entry).select().single();
+  if(data)state.exerciseLog.push(data);
+  setSyncStatus('ok');renderExerciseLog();updateOverview();updateStreaksAndAchievements();
+  document.getElementById('exDuration').value='';document.getElementById('exDistance').value='';document.getElementById('exHR').value='';document.getElementById('exNotes').value='';document.getElementById('exManualCals').value='';
 }
 function renderExerciseLog(){
   const list=document.getElementById('exerciseLogList'),empty=document.getElementById('exerciseLogEmpty'),burned=state.exerciseLog.reduce((a,e)=>a+(e.cals||0),0);
