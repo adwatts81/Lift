@@ -1236,11 +1236,21 @@ async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim(),pass=document.getElementById('loginPassword').value;
   const errEl=document.getElementById('loginError');errEl.classList.remove('show');
   if(!email||!pass){errEl.textContent='Enter email and password';errEl.classList.add('show');return;}
-  document.getElementById('loginBtn').disabled=true;document.getElementById('loginSpinner').classList.add('show');
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  document.getElementById('loginBtn').disabled=false;document.getElementById('loginSpinner').classList.remove('show');
-  if(error){errEl.textContent=error.message;errEl.classList.add('show');return;}
-  onSignedIn(data.user);
+  const btn=document.getElementById('loginBtn'),spin=document.getElementById('loginSpinner');
+  btn.disabled=true;spin.classList.add('show');
+  const unlock=()=>{btn.disabled=false;spin.classList.remove('show');};
+  try{
+    const authPromise=sb.auth.signInWithPassword({email,password:pass});
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('Connection timed out. Check your internet and try again.')),10000));
+    const{data,error}=await Promise.race([authPromise,timeout]);
+    unlock();
+    if(error){errEl.textContent=error.message;errEl.classList.add('show');return;}
+    onSignedIn(data.user);
+  }catch(e){
+    unlock();
+    errEl.textContent=e.message||'Sign in failed. Check your connection.';
+    errEl.classList.add('show');
+  }
 }
 async function doRegister(){
   const email=document.getElementById('regEmail').value.trim(),pass=document.getElementById('regPassword').value,pass2=document.getElementById('regPassword2').value;
@@ -1248,12 +1258,22 @@ async function doRegister(){
   if(!email||!pass){errEl.textContent='Fill in all fields';errEl.classList.add('show');return;}
   if(pass!==pass2){errEl.textContent='Passwords do not match';errEl.classList.add('show');return;}
   if(pass.length<6){errEl.textContent='Password must be 6+ characters';errEl.classList.add('show');return;}
-  document.getElementById('registerBtn').disabled=true;document.getElementById('registerSpinner').classList.add('show');
-  const{data,error}=await sb.auth.signUp({email,password:pass});
-  document.getElementById('registerBtn').disabled=false;document.getElementById('registerSpinner').classList.remove('show');
-  if(error){errEl.textContent=error.message;errEl.classList.add('show');return;}
-  if(data.user)onSignedIn(data.user);
-  else{errEl.textContent='Check your email to confirm your account, then sign in.';errEl.classList.add('show');}
+  const btn=document.getElementById('registerBtn'),spin=document.getElementById('registerSpinner');
+  btn.disabled=true;spin.classList.add('show');
+  const unlock=()=>{btn.disabled=false;spin.classList.remove('show');};
+  try{
+    const authPromise=sb.auth.signUp({email,password:pass});
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('Connection timed out. Check your internet and try again.')),10000));
+    const{data,error}=await Promise.race([authPromise,timeout]);
+    unlock();
+    if(error){errEl.textContent=error.message;errEl.classList.add('show');return;}
+    if(data.user)onSignedIn(data.user);
+    else{errEl.textContent='Check your email to confirm your account, then sign in.';errEl.classList.add('show');}
+  }catch(e){
+    unlock();
+    errEl.textContent=e.message||'Registration failed. Check your connection.';
+    errEl.classList.add('show');
+  }
 }
 async function doSignOut(){await sb.auth.signOut();currentUser=null;document.body.classList.remove('authed');document.getElementById('splashCover').style.display='none';document.getElementById('authScreen').classList.remove('hidden');document.getElementById('userDropdown').classList.remove('show');}
 function toggleUserMenu(){document.getElementById('userDropdown').classList.toggle('show');}
