@@ -700,10 +700,9 @@ body{transition:background .3s,color .3s;}
       </div>
       <!-- BARCODE -->
       <div class="cam-panel active" id="camPanel-barcode">
-        <div class="camera-area" id="barcodeArea" onclick="startBarcodeCamera()"><div class="ca-icon">📷</div><div class="ca-text">Tap to scan barcode</div><div class="ca-sub">Or enter barcode number below</div></div>
-        <video id="cameraPreview" autoplay playsinline style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:200px;object-fit:cover;"></video>
-        <div id="stopCameraRow" style="display:none;" class="cam-controls"><button class="btn btn-block" onclick="stopCamera()">Stop Camera</button></div>
-        <div style="display:flex;gap:7px;margin-bottom:8px;"><input type="number" id="manualBarcode" placeholder="e.g. 5000157024380" style="flex:1;"><button class="btn btn-diet" onclick="lookupBarcode()">Look Up</button></div>
+        <input type="file" id="barcodeFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodePhoto(this)">
+        <div class="camera-area" id="barcodeArea" onclick="document.getElementById('barcodeFileInput').click()"><div class="ca-icon">📷</div><div class="ca-text">Tap to scan barcode</div><div class="ca-sub">Takes a photo — AI reads the barcode</div></div>
+        <div style="display:flex;gap:7px;margin-bottom:8px;margin-top:8px;"><input type="number" id="manualBarcode" placeholder="e.g. 5000157024380" style="flex:1;"><button class="btn btn-diet" onclick="lookupBarcode()">Look Up</button></div>
         <div class="thinking" id="barcodeThinking"><div class="spinner"></div>Looking up product...</div>
         <div class="barcode-result" id="barcodeResult">
           <div class="br-name" id="brProductName">—</div>
@@ -717,8 +716,9 @@ body{transition:background .3s,color .3s;}
       </div>
       <!-- IDENTIFY -->
       <div class="cam-panel" id="camPanel-identify">
-        <div class="camera-area" id="identifyArea" onclick="startPhotoMode('identify')"><div class="ca-icon">🍔</div><div class="ca-text">Photograph your food</div><div class="ca-sub">AI identifies and estimates calories</div></div>
-        <canvas id="identifyCanvas" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;"></canvas>
+        <input type="file" id="identifyFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile('identify',this)">
+        <div class="camera-area" id="identifyArea" onclick="document.getElementById('identifyFileInput').click()"><div class="ca-icon">🍔</div><div class="ca-text">Photograph your food</div><div class="ca-sub">AI identifies and estimates calories</div></div>
+        <img id="identifyPreview" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;" alt="Food photo">
         <div class="cam-controls" id="identifyControls" style="display:none;"><button class="btn" onclick="retakePhoto('identify')">Retake</button><button class="btn btn-diet" onclick="analysePhoto('identify')">Identify Food →</button></div>
         <div class="thinking" id="identifyThinking"><div class="spinner"></div>AI identifying your food...</div>
         <div class="photo-result" id="identifyResult">
@@ -730,8 +730,9 @@ body{transition:background .3s,color .3s;}
       </div>
       <!-- LABEL -->
       <div class="cam-panel" id="camPanel-label">
-        <div class="camera-area" id="labelArea" onclick="startPhotoMode('label')"><div class="ca-icon">📋</div><div class="ca-text">Photograph a nutrition label</div><div class="ca-sub">AI reads and extracts the data</div></div>
-        <canvas id="labelCanvas" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;"></canvas>
+        <input type="file" id="labelFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile('label',this)">
+        <div class="camera-area" id="labelArea" onclick="document.getElementById('labelFileInput').click()"><div class="ca-icon">📋</div><div class="ca-text">Photograph a nutrition label</div><div class="ca-sub">AI reads and extracts the data</div></div>
+        <img id="labelPreview" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;" alt="Label photo">
         <div class="cam-controls" id="labelControls" style="display:none;"><button class="btn" onclick="retakePhoto('label')">Retake</button><button class="btn btn-diet" onclick="analysePhoto('label')">Extract Data →</button></div>
         <div class="thinking" id="labelThinking"><div class="spinner"></div>AI reading nutrition label...</div>
         <div class="photo-result" id="labelResult">
@@ -1296,87 +1297,7 @@ function redoOnboarding(){
   startOnboarding();
 }
 
-// CAMERA MODE TABS
-function switchCamMode(mode,el){
-  document.querySelectorAll('.cam-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.cam-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('camPanel-'+mode).classList.add('active');
-  stopCamera();
-}
-
-// PHOTO MODES (identify + label)
-let photoStreams={identify:null,label:null};
-async function startPhotoMode(mode){
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    photoStreams[mode]=stream;
-    // Use a temporary video element to capture
-    const video=document.createElement('video');
-    video.srcObject=stream;video.autoplay=true;video.playsinline=true;
-    video.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:3000;background:#000;';
-    const btn=document.createElement('button');
-    btn.textContent='📸 Capture';
-    btn.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:3001;background:var(--accent);color:#000;border:none;border-radius:100px;padding:16px 40px;font-size:16px;font-weight:600;cursor:pointer;';
-    const cancel=document.createElement('button');
-    cancel.textContent='✕';
-    cancel.style.cssText='position:fixed;top:24px;right:20px;z-index:3001;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;';
-    document.body.appendChild(video);document.body.appendChild(btn);document.body.appendChild(cancel);
-    const cleanup=()=>{stream.getTracks().forEach(t=>t.stop());[video,btn,cancel].forEach(el=>el.remove());photoStreams[mode]=null;};
-    cancel.onclick=cleanup;
-    btn.onclick=()=>{
-      const canvas=document.getElementById(mode+'Canvas');
-      canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-      canvas.getContext('2d').drawImage(video,0,0);
-      cleanup();
-      canvas.style.display='block';
-      document.getElementById(mode+'Area').style.display='none';
-      document.getElementById(mode+'Controls').style.display='flex';
-    };
-  }catch(e){alert('Camera not available on this device/browser.');}
-}
-function retakePhoto(mode){
-  document.getElementById(mode+'Canvas').style.display='none';
-  document.getElementById(mode+'Area').style.display='block';
-  document.getElementById(mode+'Controls').style.display='none';
-  document.getElementById(mode+'Result').style.display='none';
-}
-let photoFoodData={identify:null,label:null};
-async function analysePhoto(mode){
-  const canvas=document.getElementById(mode+'Canvas');
-  const base64=canvas.toDataURL('image/jpeg',0.8).split(',')[1];
-  document.getElementById(mode+'Thinking').classList.add('show');
-  document.getElementById(mode+'Result').style.display='none';
-  try{
-    const prompt=mode==='identify'
-      ?'You are a nutrition expert. Identify the food in this image and estimate calories and protein per serving shown. Respond ONLY valid JSON: {"name":"food name","cals":number,"protein_g":number,"description":"brief description"}'
-      :'You are a nutrition expert. Read this nutrition label image and extract the data. Respond ONLY valid JSON: {"name":"product name","cals_per_serving":number,"protein_g_per_serving":number,"serving_size":"string"}';
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},{type:'text',text:prompt}]}]})});
-    const raw=await res.json();
-    const text=raw.content?.map(b=>b.text||'').join('')||'';
-    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-    if(mode==='identify'){
-      photoFoodData.identify={name:parsed.name,cals:parsed.cals,protein:parsed.protein_g};
-      document.getElementById('identifyName').textContent=parsed.name;
-      document.getElementById('identifyMacros').textContent=`~${parsed.cals} kcal · ${parsed.protein_g}g protein · ${parsed.description||''}`;
-    } else {
-      photoFoodData.label={name:parsed.name,cals:parsed.cals_per_serving,protein:parsed.protein_g_per_serving};
-      document.getElementById('labelName').textContent=parsed.name+' (per serving: '+parsed.serving_size+')';
-      document.getElementById('labelMacros').textContent=`${parsed.cals_per_serving} kcal · ${parsed.protein_g_per_serving}g protein per serving`;
-    }
-    document.getElementById(mode+'Result').style.display='block';
-  }catch(e){alert('Could not analyse image. Try again.');}
-  document.getElementById(mode+'Thinking').classList.remove('show');
-}
-async function logPhotoFood(mode){
-  const d=photoFoodData[mode];if(!d)return;
-  const mealType=document.getElementById('mealType'+mode.charAt(0).toUpperCase()+mode.slice(1)).value;
-  await addFoodEntry({name:`${mealType}: ${d.name}`,cals:d.cals,protein:d.protein,meal_type:mealType,source:'camera'});
-  document.getElementById(mode+'Result').style.display='none';
-  retakePhoto(mode);
-}
-
-// EXERCISE EXPAND + SETS LOGGER
+// RECIPE
 const setsState={};
 const diagramCache={};
 function toggleExExpand(cardId){
@@ -1543,21 +1464,152 @@ async function deleteFoodEntry(id){await sb.from('food_log').delete().eq('id',id
 async function clearFoodLog(){await sb.from('food_log').delete().eq('user_id',currentUser.id).eq('date',todayKey());state.foodLog=[];renderFoodLog();updateGoalBar();updateDietSummary();updateOverview();}
 function updateDietSummary(){const cals=state.foodLog.reduce((a,f)=>a+(f.cals||0),0),prot=state.foodLog.reduce((a,f)=>a+(f.protein||0),0);document.getElementById('dietTotalCals').textContent=cals;document.getElementById('dietTotalPro').textContent=Math.round(prot)+'g';}
 
-// BARCODE
+// BARCODE — photo approach (works on all iOS/Android)
 let barcodeData=null;
-async function startBarcodeCamera(){
-  try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});state.cameraStream=stream;const video=document.getElementById('cameraPreview');video.srcObject=stream;video.style.display='block';document.getElementById('stopCameraRow').style.display='block';document.getElementById('barcodeArea').style.display='none';if(!window.ZXing)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/index.min.js');const reader=new window.ZXing.BrowserMultiFormatReader();reader.decodeFromVideoDevice(null,'cameraPreview',(result)=>{if(result){reader.reset();stopCamera();document.getElementById('manualBarcode').value=result.getText();lookupBarcode(result.getText());}});state.codeReader=reader;}catch(e){alert('Camera not available. Enter barcode manually.');}
+let photoData={identify:null,label:null}; // base64 strings
+
+async function handleBarcodePhoto(input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  input.value=''; // reset so same photo can be re-selected
+  const base64=await fileToBase64(file);
+  document.getElementById('barcodeThinking').classList.add('show');
+  document.getElementById('barcodeResult').style.display='none';
+  try{
+    // Ask Claude to extract barcode number from the image
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:100,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:base64}},{type:'text',text:'Read the barcode or QR code in this image. Reply ONLY with the numeric barcode digits, nothing else. If you cannot read a barcode, reply "none".'}]}]})});
+    const data=await res.json();
+    const code=(data.content?.map(b=>b.text||'').join('')||'').trim().replace(/\D/g,'');
+    if(!code||code===''){alert('Could not read barcode from photo. Try entering the number manually below.');document.getElementById('barcodeThinking').classList.remove('show');return;}
+    document.getElementById('manualBarcode').value=code;
+    await lookupBarcode(code);
+  }catch(e){alert('Error reading barcode. Try entering the number manually.');}
+  document.getElementById('barcodeThinking').classList.remove('show');
 }
-function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-function stopCamera(){if(state.cameraStream){state.cameraStream.getTracks().forEach(t=>t.stop());state.cameraStream=null;}if(state.codeReader){try{state.codeReader.reset();}catch(e){}}const v=document.getElementById('cameraPreview');if(v)v.style.display='none';const s=document.getElementById('stopCameraRow');if(s)s.style.display='none';const a=document.getElementById('barcodeArea');if(a)a.style.display='block';}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
 async function lookupBarcode(code){
-  const barcode=code||document.getElementById('manualBarcode').value.trim();if(!barcode){alert('Enter a barcode');return;}
-  document.getElementById('barcodeThinking').classList.add('show');document.getElementById('barcodeResult').style.display='none';
-  try{const res=await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);const data=await res.json();if(data.status!==1||!data.product)throw new Error();const p=data.product,n=p.nutriments||{};barcodeData={name:p.product_name||p.brands||'Unknown',cals_per_100g:n['energy-kcal_100g']||n['energy-kcal']||0,protein_per_100g:n.proteins_100g||0,carbs_per_100g:n.carbohydrates_100g||0,fat_per_100g:n.fat_100g||0,serving_size:p.serving_size||'100g',serving_quantity:parseFloat(p.serving_quantity)||100};document.getElementById('brProductName').textContent=barcodeData.name;document.getElementById('brCals').textContent=Math.round(barcodeData.cals_per_100g)+'kcal/100g';document.getElementById('brProt').textContent=barcodeData.protein_per_100g.toFixed(1)+'g/100g';document.getElementById('brCarbs').textContent=barcodeData.carbs_per_100g.toFixed(1)+'g/100g';document.getElementById('brFat').textContent=barcodeData.fat_per_100g.toFixed(1)+'g/100g';document.getElementById('brServingInfo').textContent='Serving: '+barcodeData.serving_size;document.getElementById('brUnit').textContent='serving ('+barcodeData.serving_size+')';document.getElementById('brServings').value=1;updateBarcodeCalcs();document.getElementById('barcodeResult').style.display='block';}catch(e){alert('Product not found. Try AI log instead.');}
+  const barcode=code||document.getElementById('manualBarcode').value.trim();
+  if(!barcode){alert('Enter a barcode number');return;}
+  document.getElementById('barcodeThinking').classList.add('show');
+  document.getElementById('barcodeResult').style.display='none';
+  try{
+    const res=await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    const data=await res.json();
+    if(data.status!==1||!data.product)throw new Error('not found');
+    const p=data.product,n=p.nutriments||{};
+    barcodeData={
+      name:p.product_name||p.brands||'Unknown product',
+      cals_per_100g:n['energy-kcal_100g']||n['energy-kcal']||0,
+      protein_per_100g:n.proteins_100g||0,
+      carbs_per_100g:n.carbohydrates_100g||0,
+      fat_per_100g:n.fat_100g||0,
+      serving_size:p.serving_size||'100g',
+      serving_quantity:parseFloat(p.serving_quantity)||100
+    };
+    document.getElementById('brProductName').textContent=barcodeData.name;
+    document.getElementById('brCals').textContent=Math.round(barcodeData.cals_per_100g)+'kcal/100g';
+    document.getElementById('brProt').textContent=barcodeData.protein_per_100g.toFixed(1)+'g/100g';
+    document.getElementById('brCarbs').textContent=barcodeData.carbs_per_100g.toFixed(1)+'g/100g';
+    document.getElementById('brFat').textContent=barcodeData.fat_per_100g.toFixed(1)+'g/100g';
+    document.getElementById('brServingInfo').textContent='Serving: '+barcodeData.serving_size;
+    document.getElementById('brUnit').textContent='serving ('+barcodeData.serving_size+')';
+    document.getElementById('brServings').value=1;
+    updateBarcodeCalcs();
+    document.getElementById('barcodeResult').style.display='block';
+  }catch(e){alert('Product not found in database. Try the AI meal log instead.');}
   document.getElementById('barcodeThinking').classList.remove('show');
 }
 function updateBarcodeCalcs(){if(!barcodeData)return;const servings=parseFloat(document.getElementById('brServings').value)||1;document.getElementById('brTotalCals').textContent=Math.round(barcodeData.cals_per_100g*servings*barcodeData.serving_quantity/100);}
-async function logBarcodeItem(){if(!barcodeData)return;const servings=parseFloat(document.getElementById('brServings').value)||1,totalG=servings*barcodeData.serving_quantity,cals=Math.round(barcodeData.cals_per_100g*totalG/100),protein=parseFloat((barcodeData.protein_per_100g*totalG/100).toFixed(1)),mealType=document.getElementById('mealTypeBarcode').value;await addFoodEntry({name:`${mealType}: ${barcodeData.name} (${servings} serving)`,cals,protein,meal_type:mealType,source:'barcode'});document.getElementById('barcodeResult').style.display='none';document.getElementById('manualBarcode').value='';barcodeData=null;}
+async function logBarcodeItem(){
+  if(!barcodeData)return;
+  const servings=parseFloat(document.getElementById('brServings').value)||1;
+  const totalG=servings*barcodeData.serving_quantity;
+  const cals=Math.round(barcodeData.cals_per_100g*totalG/100);
+  const protein=parseFloat((barcodeData.protein_per_100g*totalG/100).toFixed(1));
+  const mealType=document.getElementById('mealTypeBarcode').value;
+  await addFoodEntry({name:`${mealType}: ${barcodeData.name} (${servings} serving)`,cals,protein,meal_type:mealType,source:'barcode'});
+  document.getElementById('barcodeResult').style.display='none';
+  document.getElementById('manualBarcode').value='';
+  barcodeData=null;
+}
+
+// PHOTO MODES — file input approach
+async function handlePhotoFile(mode,input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  input.value='';
+  const base64=await fileToBase64(file);
+  photoData[mode]={base64,mediaType:file.type||'image/jpeg'};
+  // Show preview
+  const preview=document.getElementById(mode+'Preview');
+  preview.src='data:'+photoData[mode].mediaType+';base64,'+base64;
+  preview.style.display='block';
+  document.getElementById(mode+'Area').style.display='none';
+  document.getElementById(mode+'Controls').style.display='flex';
+  document.getElementById(mode+'Result').style.display='none';
+}
+function retakePhoto(mode){
+  document.getElementById(mode+'Preview').style.display='none';
+  document.getElementById(mode+'Area').style.display='block';
+  document.getElementById(mode+'Controls').style.display='none';
+  document.getElementById(mode+'Result').style.display='none';
+  photoData[mode]=null;
+}
+let photoFoodData={identify:null,label:null};
+async function analysePhoto(mode){
+  if(!photoData[mode]){alert('Take a photo first');return;}
+  document.getElementById(mode+'Thinking').classList.add('show');
+  document.getElementById(mode+'Result').style.display='none';
+  try{
+    const prompt=mode==='identify'
+      ?'You are a nutrition expert. Identify the food in this image and estimate calories and protein for the serving shown. Respond ONLY with valid JSON, no other text: {"name":"food name","cals":number,"protein_g":number,"description":"brief description e.g. grilled chicken breast, approx 200g"}'
+      :'You are a nutrition expert. Read this nutrition label image carefully and extract the data per serving. Respond ONLY with valid JSON, no other text: {"name":"product name","cals_per_serving":number,"protein_g_per_serving":number,"serving_size":"e.g. 30g"}';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:photoData[mode].mediaType,data:photoData[mode].base64}},{type:'text',text:prompt}]}]})});
+    const raw=await res.json();
+    const text=raw.content?.map(b=>b.text||'').join('')||'';
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(mode==='identify'){
+      photoFoodData.identify={name:parsed.name,cals:parsed.cals,protein:parsed.protein_g};
+      document.getElementById('identifyName').textContent=parsed.name;
+      document.getElementById('identifyMacros').textContent=`~${parsed.cals} kcal · ${parsed.protein_g}g protein · ${parsed.description||''}`;
+    } else {
+      photoFoodData.label={name:parsed.name,cals:parsed.cals_per_serving,protein:parsed.protein_g_per_serving};
+      document.getElementById('labelName').textContent=parsed.name+' (per serving: '+parsed.serving_size+')';
+      document.getElementById('labelMacros').textContent=`${parsed.cals_per_serving} kcal · ${parsed.protein_g_per_serving}g protein per serving`;
+    }
+    document.getElementById(mode+'Result').style.display='block';
+  }catch(e){alert('Could not analyse image. Make sure the photo is clear and try again.');}
+  document.getElementById(mode+'Thinking').classList.remove('show');
+}
+async function logPhotoFood(mode){
+  const d=photoFoodData[mode];if(!d)return;
+  const key='mealType'+mode.charAt(0).toUpperCase()+mode.slice(1);
+  const mealType=document.getElementById(key).value;
+  await addFoodEntry({name:`${mealType}: ${d.name}`,cals:d.cals,protein:d.protein,meal_type:mealType,source:'camera'});
+  document.getElementById(mode+'Result').style.display='none';
+  retakePhoto(mode);
+}
+
+// Camera mode switcher (no stopCamera needed any more)
+function switchCamMode(mode,el){
+  document.querySelectorAll('.cam-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cam-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('camPanel-'+mode).classList.add('active');
+}
+// Keep stopCamera as no-op for backward compat
+function stopCamera(){}
+function startBarcodeCamera(){document.getElementById('barcodeFileInput').click();}
+function startPhotoMode(mode){document.getElementById(mode+'FileInput').click();}
 
 // RECIPE
 function addIngredient(){const list=document.getElementById('ingredientList'),div=document.createElement('div');div.className='ingredient-item';div.innerHTML=`<input class="ingr-name" type="text" placeholder="e.g. Chicken breast"><input class="ingr-qty" type="number" placeholder="200" min="1"><select class="ingr-unit"><option>g</option><option>ml</option><option>tsp</option><option>tbsp</option><option>cup</option><option>piece</option></select><button class="del-btn" onclick="this.parentNode.remove()">×</button>`;list.appendChild(div);}
