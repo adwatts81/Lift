@@ -18,7 +18,7 @@ html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;transition:background .2s,color .2s;}
 
 /* AUTH */
-#authScreen{position:fixed;inset:0;background:#0e0e0e;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;}
+#authScreen{position:fixed;inset:0;background:var(–bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;transition:background .3s;}
 header,nav,.sync-bar,main{visibility:hidden;}
 body.authed header,body.authed nav,body.authed .sync-bar,body.authed main{visibility:visible;}
 #authScreen.hidden{display:none;}
@@ -299,7 +299,7 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 @keyframes toastOut{from{opacity:1;}to{opacity:0;}}
 
 /* ONBOARDING */
-#onboardScreen{position:fixed;inset:0;background:#0e0e0e;z-index:1100;display:none;flex-direction:column;overflow-y:auto;}
+#onboardScreen{position:fixed;inset:0;background:var(–bg);z-index:1100;display:none;flex-direction:column;overflow-y:auto;transition:background .3s;}
 #onboardScreen.show{display:flex;}
 .ob-header{padding:32px 24px 0;flex-shrink:0;}
 .ob-logo{font-family:‘Bebas Neue’,sans-serif;font-size:36px;color:var(–accent);letter-spacing:3px;}
@@ -356,9 +356,19 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 .ob-plan-stat-val{font-family:‘Bebas Neue’,sans-serif;font-size:20px;color:var(–accent);line-height:1;}
 
 /* THEME */
-[data-theme=“light”]{–bg:#f0f0ec;–surface:#e4e4e0;–card:#ffffff;–border:#d4d4d0;–border2:#b8b8b4;–text:#111111;–muted:#999999;–muted2:#666666;–input-bg:#f8f8f6;}
-[data-theme=“dark”]{–bg:#0e0e0e;–surface:#141414;–card:#1a1a1a;–border:#272727;–border2:#3a3a3a;–text:#efefef;–muted:#5a5a5a;–muted2:#888;–input-bg:#141414;}
-body{transition:background .2s,color .2s;}
+[data-theme=“light”]{
+–bg:#f0f0ec;–surface:#e4e4e0;–card:#ffffff;–border:#d4d4d0;–border2:#b8b8b4;
+–text:#111111;–muted:#888888;–muted2:#555555;–input-bg:#f8f8f6;
+–accent:#5a8a00;–accent2:#d4460a;–push:#2563eb;–pull:#059669;–full:#d97706;
+–diet:#9333ea;–weight:#e11d48;–exlog:#059669;–blue:#2563eb;–danger:#dc2626;
+}
+[data-theme=“dark”]{
+–bg:#0e0e0e;–surface:#141414;–card:#1a1a1a;–border:#272727;–border2:#3a3a3a;
+–text:#efefef;–muted:#5a5a5a;–muted2:#888;–input-bg:#141414;
+–accent:#e8ff47;–accent2:#ff6b35;–push:#3b82f6;–pull:#10b981;–full:#f59e0b;
+–diet:#c084fc;–weight:#fb7185;–exlog:#34d399;–blue:#60a5fa;–danger:#ef4444;
+}
+body{transition:background .3s,color .3s;}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;display:none;align-items:flex-end;justify-content:center;}
@@ -378,8 +388,8 @@ body{transition:background .2s,color .2s;}
 .ex-expand.open{display:block;}
 .ex-diagram{background:var(–surface);border-radius:10px;padding:8px;margin-bottom:8px;text-align:center;}
 .ex-diagram svg{width:100%;max-width:260px;height:auto;}
-.ex-yt-link{display:flex;align-items:center;gap:7px;background:#1a0808;border:1px solid #5a1a1a;border-radius:8px;padding:9px 12px;text-decoration:none;color:#f87171;font-size:12px;margin-bottom:10px;transition:all .15s;}
-.ex-yt-link:hover{border-color:#f87171;}
+.ex-yt-link{display:flex;align-items:center;gap:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px 12px;text-decoration:none;color:var(–danger);font-size:12px;margin-bottom:10px;transition:all .15s;}
+.ex-yt-link:hover{border-color:var(–danger);}
 .ex-yt-icon{font-size:16px;flex-shrink:0;}
 
 /* SETS LOGGER */
@@ -442,7 +452,7 @@ body{transition:background .2s,color .2s;}
 </head>
 <body>
 <!-- Splash cover shown until auth resolves -->
-<div id="splashCover" style="position:fixed;inset:0;background:#0e0e0e;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div></div>
+<div id="splashCover" style="position:fixed;inset:0;background:var(--bg,#0e0e0e);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:background .3s;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div></div>
 
 <!-- AUTH SCREEN -->
 
@@ -1097,11 +1107,22 @@ function showView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const idx=['overview','sessionA','sessionB','sessionC','diet','exercise','weight'].indexOf(v);
-  document.querySelectorAll('.nb')[idx].classList.add('active');
+  const navItems=['overview','sessionA','sessionB','sessionC','diet','exercise','weight','settings'];
+  const idx=navItems.indexOf(v);
+  if(idx>=0&&document.querySelectorAll('.nb')[idx])document.querySelectorAll('.nb')[idx].classList.add('active');
   if(v==='diet'){renderFoodLog();updateDietSummary();updateGoalBar();}
   if(v==='weight')renderWeightLog();
   if(v==='exercise')renderExerciseLog();
+  if(v==='settings'){
+    const e=currentUser?.email||'—';
+    document.getElementById('settingsEmail').textContent=e;
+    const cal=state.prefs.cal_goal||2000;
+    document.getElementById('settingsCalGoal').value=cal;
+    // Sync theme buttons
+    const t=localStorage.getItem('lift_theme')||'dark';
+    document.getElementById('themeDark').classList.toggle('active',t==='dark');
+    document.getElementById('themeLight').classList.toggle('active',t==='light');
+  }
   updateOverview();
 }
 
@@ -1241,7 +1262,219 @@ function showAchievementToast(name){
   setTimeout(()=>toast.classList.remove('show'),3200);
 }
 
-// TIMERS
+// THEME
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('lift_theme',t);
+  document.getElementById('themeDark').classList.toggle('active',t==='dark');
+  document.getElementById('themeLight').classList.toggle('active',t==='light');
+  // Update splash logo colour for light mode legibility
+  const splashLogo=document.querySelector('#splashCover > div:first-child');
+  if(splashLogo)splashLogo.style.color=t==='light'?'#5a8a00':'#e8ff47';
+  const splashSub=document.querySelector('#splashCover > div:last-child');
+  if(splashSub)splashSub.style.color=t==='light'?'#888':'#5a5a5a';
+}
+// Apply saved theme immediately
+(()=>{const t=localStorage.getItem('lift_theme')||'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('themeDark')&&document.getElementById('themeDark').classList.toggle('active',t==='dark');document.getElementById('themeLight')&&document.getElementById('themeLight').classList.toggle('active',t==='light');})();
+
+// SETTINGS SYNC
+function syncCalGoalFromSettings(){
+  const v=parseInt(document.getElementById('settingsCalGoal').value)||2000;
+  state.prefs.cal_goal=v;
+  if(document.getElementById('calGoalInput'))document.getElementById('calGoalInput').value=v;
+  savePrefs();
+}
+function syncCalGoal(){
+  const v=parseInt(document.getElementById('calGoalInput').value)||2000;
+  state.prefs.cal_goal=v;
+  if(document.getElementById('settingsCalGoal'))document.getElementById('settingsCalGoal').value=v;
+  savePrefs();
+}
+function redoOnboarding(){
+  if(!confirm('This will restart the onboarding and regenerate your AI plan. Continue?'))return;
+  document.getElementById('userDropdown').classList.remove('show');
+  startOnboarding();
+}
+
+// CAMERA MODE TABS
+function switchCamMode(mode,el){
+  document.querySelectorAll('.cam-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cam-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('camPanel-'+mode).classList.add('active');
+  stopCamera();
+}
+
+// PHOTO MODES (identify + label)
+let photoStreams={identify:null,label:null};
+async function startPhotoMode(mode){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    photoStreams[mode]=stream;
+    // Use a temporary video element to capture
+    const video=document.createElement('video');
+    video.srcObject=stream;video.autoplay=true;video.playsinline=true;
+    video.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:3000;background:#000;';
+    const btn=document.createElement('button');
+    btn.textContent='📸 Capture';
+    btn.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:3001;background:var(--accent);color:#000;border:none;border-radius:100px;padding:16px 40px;font-size:16px;font-weight:600;cursor:pointer;';
+    const cancel=document.createElement('button');
+    cancel.textContent='✕';
+    cancel.style.cssText='position:fixed;top:24px;right:20px;z-index:3001;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;';
+    document.body.appendChild(video);document.body.appendChild(btn);document.body.appendChild(cancel);
+    const cleanup=()=>{stream.getTracks().forEach(t=>t.stop());[video,btn,cancel].forEach(el=>el.remove());photoStreams[mode]=null;};
+    cancel.onclick=cleanup;
+    btn.onclick=()=>{
+      const canvas=document.getElementById(mode+'Canvas');
+      canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+      canvas.getContext('2d').drawImage(video,0,0);
+      cleanup();
+      canvas.style.display='block';
+      document.getElementById(mode+'Area').style.display='none';
+      document.getElementById(mode+'Controls').style.display='flex';
+    };
+  }catch(e){alert('Camera not available on this device/browser.');}
+}
+function retakePhoto(mode){
+  document.getElementById(mode+'Canvas').style.display='none';
+  document.getElementById(mode+'Area').style.display='block';
+  document.getElementById(mode+'Controls').style.display='none';
+  document.getElementById(mode+'Result').style.display='none';
+}
+let photoFoodData={identify:null,label:null};
+async function analysePhoto(mode){
+  const canvas=document.getElementById(mode+'Canvas');
+  const base64=canvas.toDataURL('image/jpeg',0.8).split(',')[1];
+  document.getElementById(mode+'Thinking').classList.add('show');
+  document.getElementById(mode+'Result').style.display='none';
+  try{
+    const prompt=mode==='identify'
+      ?'You are a nutrition expert. Identify the food in this image and estimate calories and protein per serving shown. Respond ONLY valid JSON: {"name":"food name","cals":number,"protein_g":number,"description":"brief description"}'
+      :'You are a nutrition expert. Read this nutrition label image and extract the data. Respond ONLY valid JSON: {"name":"product name","cals_per_serving":number,"protein_g_per_serving":number,"serving_size":"string"}';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},{type:'text',text:prompt}]}]})});
+    const raw=await res.json();
+    const text=raw.content?.map(b=>b.text||'').join('')||'';
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(mode==='identify'){
+      photoFoodData.identify={name:parsed.name,cals:parsed.cals,protein:parsed.protein_g};
+      document.getElementById('identifyName').textContent=parsed.name;
+      document.getElementById('identifyMacros').textContent=`~${parsed.cals} kcal · ${parsed.protein_g}g protein · ${parsed.description||''}`;
+    } else {
+      photoFoodData.label={name:parsed.name,cals:parsed.cals_per_serving,protein:parsed.protein_g_per_serving};
+      document.getElementById('labelName').textContent=parsed.name+' (per serving: '+parsed.serving_size+')';
+      document.getElementById('labelMacros').textContent=`${parsed.cals_per_serving} kcal · ${parsed.protein_g_per_serving}g protein per serving`;
+    }
+    document.getElementById(mode+'Result').style.display='block';
+  }catch(e){alert('Could not analyse image. Try again.');}
+  document.getElementById(mode+'Thinking').classList.remove('show');
+}
+async function logPhotoFood(mode){
+  const d=photoFoodData[mode];if(!d)return;
+  const mealType=document.getElementById('mealType'+mode.charAt(0).toUpperCase()+mode.slice(1)).value;
+  await addFoodEntry({name:`${mealType}: ${d.name}`,cals:d.cals,protein:d.protein,meal_type:mealType,source:'camera'});
+  document.getElementById(mode+'Result').style.display='none';
+  retakePhoto(mode);
+}
+
+// EXERCISE EXPAND + SETS LOGGER
+const setsState={};
+const diagramCache={};
+function toggleExExpand(cardId){
+  const panel=document.getElementById('expand-'+cardId);
+  if(!panel)return;
+  const isOpen=panel.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.ex-expand.open').forEach(p=>p.classList.remove('open'));
+  if(!isOpen){panel.classList.add('open');renderExpandPanel(cardId);}
+}
+function openExpand(cardId){
+  const panel=document.getElementById('expand-'+cardId);
+  if(!panel)return;
+  panel.classList.add('open');
+  renderExpandPanel(cardId);
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderExpandPanel(cardId){
+  const card=document.getElementById(cardId);
+  if(!card)return;
+  const exName=card.dataset.name||'Exercise';
+  const session=card.dataset.session||'A';
+  if(!setsState[cardId])setsState[cardId]=[{reps:'',weight:'',done:false},{reps:'',weight:'',done:false},{reps:'',weight:'',done:false}];
+  const panel=document.getElementById('expand-'+cardId);
+  const ytQuery=encodeURIComponent(exName+' exercise technique');
+  const sets=setsState[cardId];
+  panel.innerHTML=`
+    <div class="ex-diagram" id="diag-${cardId}"><div style="color:var(--muted);font-size:11px;padding:8px;">Loading diagram...</div></div>
+    <a class="ex-yt-link" href="https://www.youtube.com/results?search_query=${ytQuery}" target="_blank"><span class="ex-yt-icon">▶️</span>Watch ${exName} technique on YouTube</a>
+    <div class="sets-logger">
+      <div class="sets-header"><span class="sets-title">Sets</span><button class="sets-history-btn" onclick="showStrengthHistory('${exName}')">History ↗</button></div>
+      <div class="set-col-labels"><div class="set-col-label">#</div><div class="set-col-label">Reps</div><div class="set-col-label">kg</div><div class="set-col-label">✓</div></div>
+      <div id="setRows-${cardId}"></div>
+      <button class="add-set-btn" onclick="addSet('${cardId}')">+ Add Set</button>
+      <button class="save-sets-btn" onclick="saveSets('${cardId}','${exName}','${session}')">Save Sets</button>
+    </div>`;
+  renderSetRows(cardId);
+  generateDiagram(cardId,exName);
+}
+function renderSetRows(cardId){
+  const container=document.getElementById('setRows-'+cardId);if(!container)return;
+  const sets=setsState[cardId]||[];
+  container.innerHTML=sets.map((s,i)=>`
+    <div class="set-row">
+      <div class="set-num">${i+1}</div>
+      <input class="set-input" type="number" placeholder="10" value="${s.reps}" onchange="updateSet('${cardId}',${i},'reps',this.value)" min="1">
+      <input class="set-input" type="number" placeholder="60" value="${s.weight}" onchange="updateSet('${cardId}',${i},'weight',this.value)" step="0.5">
+      <button class="set-done-btn${s.done?' completed':''}" onclick="toggleSetDone('${cardId}',${i})">${s.done?'✓':''}</button>
+    </div>`).join('');
+}
+function updateSet(cardId,i,field,val){if(setsState[cardId]&&setsState[cardId][i])setsState[cardId][i][field]=val;}
+function toggleSetDone(cardId,i){
+  if(!setsState[cardId])return;
+  setsState[cardId][i].done=!setsState[cardId][i].done;
+  renderSetRows(cardId);
+  // Auto-complete exercise card if all sets done
+  if(setsState[cardId].every(s=>s.done)){const card=document.getElementById(cardId);if(card){card.classList.add('done');const session=card.dataset.session;if(session)updateSeshProgress(session);}}
+}
+function addSet(cardId){if(!setsState[cardId])setsState[cardId]=[];setsState[cardId].push({reps:'',weight:'',done:false});renderSetRows(cardId);}
+async function saveSets(cardId,exerciseName,session){
+  if(!currentUser)return;
+  const sets=setsState[cardId];
+  if(!sets||sets.every(s=>!s.reps&&!s.weight)){alert('Enter at least one set');return;}
+  try{
+    await sb.from('strength_log').insert({user_id:currentUser.id,date:todayKey(),session,exercise:exerciseName,sets:JSON.stringify(sets)});
+    const btn=document.querySelector(`#expand-${cardId} .save-sets-btn`);
+    if(btn){btn.textContent='Saved ✓';btn.style.background='var(--pull)';setTimeout(()=>{btn.textContent='Save Sets';btn.style.background='';},2000);}
+  }catch(e){alert('Could not save. Check your internet connection.');}
+}
+async function showStrengthHistory(exerciseName){
+  if(!currentUser)return;
+  const{data}=await sb.from('strength_log').select('*').eq('user_id',currentUser.id).eq('exercise',exerciseName).order('date',{ascending:false}).limit(10);
+  const modal=document.getElementById('strengthModal');
+  document.getElementById('strengthModalTitle').textContent=exerciseName+' — History';
+  document.getElementById('strengthModalBody').innerHTML=(!data||!data.length)
+    ?'<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No history yet. Log some sets!</p>'
+    :data.map(entry=>{
+      const sets=typeof entry.sets==='string'?JSON.parse(entry.sets):entry.sets;
+      const maxW=Math.max(...sets.filter(s=>s.weight).map(s=>parseFloat(s.weight)||0));
+      const vol=sets.reduce((a,s)=>(parseFloat(s.reps)||0)*(parseFloat(s.weight)||0)+a,0);
+      return`<div class="history-entry"><div class="he-date">${entry.date} · Max: ${maxW}kg · Vol: ${vol}kg</div><div class="he-sets">${sets.map(s=>`<div class="he-set">${s.reps||'?'} <span>× ${s.weight||'?'}kg</span></div>`).join('')}</div></div>`;
+    }).join('');
+  modal.classList.add('show');
+}
+function closeStrengthModal(){document.getElementById('strengthModal').classList.remove('show');}
+
+async function generateDiagram(cardId,exName){
+  const el=document.getElementById('diag-'+cardId);if(!el)return;
+  if(diagramCache[exName]){el.innerHTML=diagramCache[exName];return;}
+  try{
+    const svg=await callClaude(`Create a minimal SVG stick figure diagram showing correct form for "${exName}". Output ONLY the SVG element, no explanation. Use viewBox="0 0 200 140", stroke="#e8ff47", stroke-width="2", fill="none", background rect fill="#1a1a1a". Keep it simple — just lines and circles for joints.`);
+    const match=svg.match(/<svg[\s\S]*?<\/svg>/i);
+    if(match){diagramCache[exName]=match[0];el.innerHTML=match[0];}
+    else el.innerHTML='<div style="color:var(--muted);font-size:11px;padding:8px;">Form diagram unavailable</div>';
+  }catch(e){el.innerHTML='<div style="color:var(--muted);font-size:11px;padding:8px;">Form diagram unavailable</div>';}
+}
+
+
 const timers={A:null,B:null,C:null},timerSecs={A:2700,B:2700,C:2700};
 const fmt=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 function startTimer(id){if(timers[id])return;timers[id]=setInterval(()=>{if(timerSecs[id]>0){timerSecs[id]--;document.getElementById('timer'+id).textContent=fmt(timerSecs[id]);}else{clearInterval(timers[id]);timers[id]=null;}},1000);}
@@ -1313,10 +1546,10 @@ function updateDietSummary(){const cals=state.foodLog.reduce((a,f)=>a+(f.cals||0
 // BARCODE
 let barcodeData=null;
 async function startBarcodeCamera(){
-  try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});state.cameraStream=stream;const video=document.getElementById('cameraPreview');video.srcObject=stream;video.style.display='block';document.getElementById('stopCameraRow').style.display='block';document.getElementById('cameraArea').style.display='none';if(!window.ZXing)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/index.min.js');const reader=new window.ZXing.BrowserMultiFormatReader();reader.decodeFromVideoDevice(null,'cameraPreview',(result)=>{if(result){reader.reset();stopCamera();document.getElementById('manualBarcode').value=result.getText();lookupBarcode(result.getText());}});state.codeReader=reader;}catch(e){alert('Camera not available. Enter barcode manually.');}
+  try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});state.cameraStream=stream;const video=document.getElementById('cameraPreview');video.srcObject=stream;video.style.display='block';document.getElementById('stopCameraRow').style.display='block';document.getElementById('barcodeArea').style.display='none';if(!window.ZXing)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.18.6/index.min.js');const reader=new window.ZXing.BrowserMultiFormatReader();reader.decodeFromVideoDevice(null,'cameraPreview',(result)=>{if(result){reader.reset();stopCamera();document.getElementById('manualBarcode').value=result.getText();lookupBarcode(result.getText());}});state.codeReader=reader;}catch(e){alert('Camera not available. Enter barcode manually.');}
 }
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-function stopCamera(){if(state.cameraStream){state.cameraStream.getTracks().forEach(t=>t.stop());state.cameraStream=null;}if(state.codeReader){try{state.codeReader.reset();}catch(e){}}document.getElementById('cameraPreview').style.display='none';document.getElementById('stopCameraRow').style.display='none';document.getElementById('cameraArea').style.display='block';}
+function stopCamera(){if(state.cameraStream){state.cameraStream.getTracks().forEach(t=>t.stop());state.cameraStream=null;}if(state.codeReader){try{state.codeReader.reset();}catch(e){}}const v=document.getElementById('cameraPreview');if(v)v.style.display='none';const s=document.getElementById('stopCameraRow');if(s)s.style.display='none';const a=document.getElementById('barcodeArea');if(a)a.style.display='block';}
 async function lookupBarcode(code){
   const barcode=code||document.getElementById('manualBarcode').value.trim();if(!barcode){alert('Enter a barcode');return;}
   document.getElementById('barcodeThinking').classList.add('show');document.getElementById('barcodeResult').style.display='none';
