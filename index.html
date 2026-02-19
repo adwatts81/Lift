@@ -524,7 +524,7 @@ ATHLETE OS — NEW COMPONENTS
 </head>
 <body>
 <!-- Splash cover shown until auth resolves -->
-<div id="splashCover" style="position:fixed;inset:0;background:var(--bg,#0e0e0e);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:background .3s;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div></div>
+<div id="splashCover" style="position:fixed;inset:0;background:var(--bg,#0e0e0e);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:background .3s;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div id="splashStatus" style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div><div id="splashDebug" style="font-size:11px;color:#444;margin-top:12px;text-align:center;padding:0 24px;line-height:1.6;"></div><button onclick="document.getElementById('splashCover').style.display='none';document.getElementById('authScreen').classList.remove('hidden');" style="margin-top:20px;background:none;border:1px solid #333;border-radius:8px;padding:8px 20px;color:#555;font-size:11px;cursor:pointer;">Tap if stuck</button></div>
 
 <!-- AUTH SCREEN -->
 
@@ -2544,25 +2544,30 @@ document.getElementById(‘loginEmail’).addEventListener(‘keydown’,e=>{if(
 // INIT
 (async()=>{
 addIngredient();
+const dbg=t=>{const el=document.getElementById(‘splashDebug’);if(el)el.innerHTML+=t+’<br>’;console.log(t);};
+dbg(‘App started’);
 if(!sb){
+dbg(‘ERROR: Supabase failed to init’);
 document.getElementById(‘splashCover’).style.display=‘none’;
-alert(‘Could not connect to server. Please check your internet connection and reload.’);
+alert(‘Could not connect. Check internet and reload.’);
 return;
 }
-// Race getSession against a 6s timeout so we never hang forever
+dbg(‘Supabase ready — checking session…’);
 try{
 const sessionPromise=sb.auth.getSession();
 const timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error(‘session timeout’)),6000));
-const{data:{session}}=await Promise.race([sessionPromise,timeoutPromise]);
+const result=await Promise.race([sessionPromise,timeoutPromise]);
+const session=result?.data?.session;
+dbg(session?’Session found: ’+session.user.email:‘No session — showing login’);
 if(session?.user){
 onSignedIn(session.user);
 } else {
 document.getElementById(‘splashCover’).style.display=‘none’;
 }
 }catch(e){
+dbg(’Session error: ’+e.message);
 console.error(‘Session check failed:’,e);
 document.getElementById(‘splashCover’).style.display=‘none’;
-// Show auth screen so user can sign in manually
 }
 })();
 if(sb)sb.auth.onAuthStateChange((event)=>{if(event===‘SIGNED_OUT’){currentUser=null;}});
