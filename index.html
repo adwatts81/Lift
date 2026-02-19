@@ -518,7 +518,7 @@ body{transition:background .3s,color .3s;}
 <header>
   <div class="logo">LIFT<span>Training & Nutrition</span></div>
   <div class="header-right">
-    <div class="week-badge"><div class="wn" id="weekNum">W1</div><div class="wl">of year</div></div>
+    <div class="week-badge"><div class="wn" id="todayDate" style="font-size:16px;letter-spacing:0;"></div><div class="wl" id="todayDay"></div></div>
     <div class="user-menu">
       <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">?</div>
       <div class="user-dropdown" id="userDropdown">
@@ -809,6 +809,11 @@ body{transition:background .3s,color .3s;}
     <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--exlog);" id="totalBurnedDisplay">0</div>
     <div style="font-size:10px;color:var(--muted);">kcal</div>
   </div>
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title" style="color:var(--exlog);">Strava</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:12px;line-height:1.5;">Export today's sessions as a GPX file and upload manually to Strava. Full OAuth sync requires a server — coming when the native app launches.</div>
+    <button class="btn btn-ex btn-block" onclick="exportGPX()">Export GPX for Strava</button>
+  </div>
 </div>
 
 <!-- WEIGHT -->
@@ -895,7 +900,9 @@ body{transition:background .3s,color .3s;}
 <script>
 const SUPA_URL='https://xswragxhltdsrlqigkwx.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzd3JhZ3hobHRkc3JscWlna3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzMxOTEsImV4cCI6MjA4NzAwOTE5MX0.aHlixcwUSAwoFPV9ro19hFB5L89lfhiXkvNu9b-jXhI';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let sb;
+try { sb=supabase.createClient(SUPA_URL,SUPA_KEY); }
+catch(e) { console.error('Supabase failed to load',e); document.body.innerHTML='<div style="padding:40px;color:#fff;font-family:sans-serif;background:#0e0e0e;min-height:100vh"><h2>⚠️ Loading error</h2><p style="color:#888;margin-top:12px;">Could not connect. Please check your internet connection and reload the page.</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#e8ff47;color:#000;border:none;border-radius:8px;font-size:14px;cursor:pointer;">Reload</button></div>'; throw e; }
 let currentUser=null;
 let state={foodLog:[],weightLog:[],exerciseLog:[],prefs:{cal_goal:2000,water:0,current_weight:'',target_weight:''},foodHistory:[],exerciseHistory:[]};
 
@@ -1099,10 +1106,16 @@ async function savePrefs(){
 
 // NAV
 const rotations=[[{day:'MON',s:'A',t:'push'},{day:'WED',s:'B',t:'pull'},{day:'FRI',s:'C',t:'full'}],[{day:'MON',s:'B',t:'pull'},{day:'WED',s:'C',t:'full'},{day:'FRI',s:'A',t:'push'}],[{day:'MON',s:'C',t:'full'},{day:'WED',s:'A',t:'push'},{day:'FRI',s:'B',t:'pull'}]];
-// ISO calendar week of the year (W1–W52/53)
-function getISOWeek(d){const date=new Date(d);date.setHours(0,0,0,0);date.setDate(date.getDate()+3-(date.getDay()+6)%7);const week1=new Date(date.getFullYear(),0,4);return 1+Math.round(((date-week1)/864e5-3+(week1.getDay()+6)%7)/7);}
-const isoWeek=getISOWeek(new Date());
-document.getElementById('weekNum').textContent='W'+isoWeek;
+// Header date
+(function(){
+  const now=new Date();
+  const day=now.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+  const date=now.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const el=document.getElementById('todayDate');
+  const dl=document.getElementById('todayDay');
+  if(el)el.textContent=date;
+  if(dl)dl.textContent=day;
+})();
 // Training rotation based on user's join date (loaded after sign in)
 function renderWeekSched(){
   const joinDate=currentUser?.created_at?new Date(currentUser.created_at):new Date();
@@ -1655,25 +1668,29 @@ async function logExercise(){
   const duration=document.getElementById('exDuration').value,distance=document.getElementById('exDistance').value,hr=document.getElementById('exHR').value,notes=document.getElementById('exNotes').value,manualCals=document.getElementById('exManualCals').value;
   if(!duration){alert('Enter duration');return;}
   const desc=`${exType}, ${duration} mins${distance?' '+distance+'km':''}${hr?', avg HR '+hr+'bpm':''}, effort: ${effort}. Notes: ${notes||'none'}`;
-  let cals,description;
+  let cals=0,description=`${exType} · ${duration} min${distance?' · '+distance+'km':''}${hr?' · '+hr+'bpm':''} · ${effort}`;
   if(manualCals&&parseInt(manualCals)>0){
     cals=parseInt(manualCals);
-    description=`${exType} · ${duration} min${distance?' · '+distance+'km':''}${hr?' · '+hr+'bpm':''} · ${effort}`;
   } else {
     document.getElementById('exThinking').classList.add('show');
     try{
       const raw=await callClaude(`Sports scientist. Estimate calorie burn for fit male endurance athlete: ${desc}. Respond ONLY valid JSON: {"cals_burned":number,"description":"short session summary"}`);
       const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-      cals=parsed.cals_burned;description=parsed.description;
-    }catch(e){alert('Could not estimate. Try again or enter calories manually.');document.getElementById('exThinking').classList.remove('show');return;}
+      if(parsed.cals_burned){cals=parsed.cals_burned;description=parsed.description;}
+    }catch(e){/* AI failed - save anyway with 0 cals, user can edit */}
     document.getElementById('exThinking').classList.remove('show');
   }
-  const entry={user_id:currentUser.id,date:todayKey(),type:exType,duration:parseInt(duration),distance:distance?parseFloat(distance):null,hr:hr?parseInt(hr):null,effort,notes,cals,description};
-  setSyncStatus('syncing');
-  const{data}=await sb.from('exercise_log').insert(entry).select().single();
-  if(data)state.exerciseLog.push(data);
-  setSyncStatus('ok');renderExerciseLog();updateOverview();updateStreaksAndAchievements();
-  document.getElementById('exDuration').value='';document.getElementById('exDistance').value='';document.getElementById('exHR').value='';document.getElementById('exNotes').value='';document.getElementById('exManualCals').value='';
+  try{
+    const entry={user_id:currentUser.id,date:todayKey(),type:exType,duration:parseInt(duration),distance:distance?parseFloat(distance):null,hr:hr?parseInt(hr):null,effort,notes,cals,description};
+    setSyncStatus('syncing');
+    const{data,error}=await sb.from('exercise_log').insert(entry).select().single();
+    if(error)throw error;
+    if(data)state.exerciseLog.push(data);
+    setSyncStatus('ok');
+    renderExerciseLog();updateOverview();updateStreaksAndAchievements();
+    document.getElementById('exDuration').value='';document.getElementById('exDistance').value='';document.getElementById('exHR').value='';document.getElementById('exNotes').value='';document.getElementById('exManualCals').value='';
+    if(cals===0)alert('Session saved! AI estimate unavailable — enter calories manually if needed.');
+  }catch(e){setSyncStatus('error');alert('Could not save session. Check your connection and try again.');}
 }
 function renderExerciseLog(){
   const list=document.getElementById('exerciseLogList'),empty=document.getElementById('exerciseLogEmpty'),burned=state.exerciseLog.reduce((a,e)=>a+(e.cals||0),0);
@@ -1687,14 +1704,42 @@ async function deleteExercise(id){await sb.from('exercise_log').delete().eq('id'
 // WEIGHT
 function updateToGo(){const cw=parseFloat(document.getElementById('currentWeightInput').value),tw=parseFloat(document.getElementById('targetWeightInput').value),section=document.getElementById('toGoSection');if(cw&&tw){section.style.display='block';document.getElementById('toGoNum').textContent=Math.abs(cw-tw).toFixed(1)+'kg';document.getElementById('toGoLabel').textContent=cw>tw?'to lose to reach target':'gained toward target';}else section.style.display='none';}
 async function logWeight(){
-  const w=parseFloat(document.getElementById('logWeightInput').value);if(!w||w<30||w>300){alert('Enter a valid weight');return;}
-  setSyncStatus('syncing');const entry={user_id:currentUser.id,date:todayKey(),weight:w};const{data}=await sb.from('weight_log').insert(entry).select().single();if(data)state.weightLog.push(data);setSyncStatus('ok');state.prefs.current_weight=w;document.getElementById('currentWeightInput').value=w;await savePrefs();renderWeightLog();updateOverview();updateStreaksAndAchievements();document.getElementById('logWeightInput').value='';
+  const w=parseFloat(document.getElementById('logWeightInput').value);
+  if(!w||w<30||w>300){alert('Enter a valid weight (30–300 kg)');return;}
+  // Check for recent weigh-in (within 5 days — allow some flexibility around weekly)
+  if(state.weightLog.length){
+    const sorted=[...state.weightLog].sort((a,b)=>a.date<b.date?1:-1);
+    const last=sorted[0];
+    const daysSince=Math.floor((new Date(todayKey())-new Date(last.date))/(1000*60*60*24));
+    if(daysSince<5){
+      const ok=confirm(`You last weighed in ${daysSince===0?'today':daysSince+' day'+(daysSince>1?'s':'')+' ago'} (${last.weight}kg). Log again anyway?`);
+      if(!ok)return;
+    }
+  }
+  setSyncStatus('syncing');
+  const entry={user_id:currentUser.id,date:todayKey(),weight:w};
+  const{data,error}=await sb.from('weight_log').insert(entry).select().single();
+  if(error){setSyncStatus('error');alert('Could not save. Try again.');return;}
+  if(data)state.weightLog.push(data);
+  setSyncStatus('ok');
+  state.prefs.current_weight=w;
+  document.getElementById('currentWeightInput').value=w;
+  await savePrefs();
+  renderWeightLog();updateOverview();updateStreaksAndAchievements();
+  document.getElementById('logWeightInput').value='';
 }
 function renderWeightLog(){
   const list=document.getElementById('weightLogList');
   if(!state.weightLog.length){list.innerHTML='<div style="text-align:center;padding:14px;color:var(--muted);font-size:12px;font-style:italic;">No weigh-ins logged yet.</div>';document.getElementById('chartEmpty').style.display='block';document.getElementById('weightChart').style.display='none';return;}
   const sorted=[...state.weightLog].sort((a,b)=>a.date>b.date?1:-1);
-  list.innerHTML=sorted.slice().reverse().map((e,i,arr)=>{const prev=arr[i+1];const delta=prev?(e.weight-prev.weight).toFixed(1):null;const dh=delta?`<span class="wl-delta ${delta>0?'up':'down'}">${delta>0?'+':''}${delta}kg</span>`:'';return`<div class="wl-item"><span class="wl-date">${e.date}</span><div style="display:flex;align-items:center;gap:8px;">${dh}<span class="wl-val">${e.weight}kg</span><button class="del-btn" onclick="deleteWeight('${e.id}')">×</button></div></div>`;}).join('');
+  list.innerHTML=sorted.slice().reverse().map((e,i,arr)=>{
+    const prev=arr[i+1];
+    const delta=prev?(e.weight-prev.weight).toFixed(1):null;
+    const days=prev?Math.floor((new Date(e.date)-new Date(prev.date))/(1000*60*60*24)):null;
+    const dh=delta?`<span class="wl-delta ${delta>0?'up':'down'}">${delta>0?'+':''}${delta}kg</span>`:'';
+    const dayLabel=days?`<span style="font-size:9px;color:var(--muted);margin-right:4px;">${days}d</span>`:'';
+    return`<div class="wl-item"><span class="wl-date">${e.date}</span><div style="display:flex;align-items:center;gap:6px;">${dayLabel}${dh}<span class="wl-val">${e.weight}kg</span><button class="del-btn" onclick="deleteWeight('${e.id}')">×</button></div></div>`;
+  }).join('');
   if(sorted.length>=2){drawWeightChart(sorted);document.getElementById('chartEmpty').style.display='none';document.getElementById('weightChart').style.display='block';}
 }
 async function deleteWeight(id){await sb.from('weight_log').delete().eq('id',id);state.weightLog=state.weightLog.filter(w=>w.id!==id);renderWeightLog();updateOverview();}
@@ -1720,6 +1765,41 @@ async function exportData(){
   csv+='\nWEIGHT LOG\nDate,Weight(kg)\n';(weight||[]).forEach(w=>{csv+=`${w.date},${w.weight}\n`;});
   csv+='\nEXERCISE LOG\nDate,Type,Duration(min),Distance(km),HR,Effort,Calories,Description\n';(exercise||[]).forEach(e=>{csv+=`${e.date},${e.type},${e.duration},${e.distance||''},${e.hr||''},${e.effort},${e.cals},"${e.description}"\n`;});
   const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lift-data.csv';a.click();
+}
+
+// STRAVA GPX EXPORT
+async function exportGPX(){
+  if(!state.exerciseLog.length){alert('No exercise sessions logged today.');return;}
+  const today=todayKey();
+  const sessions=state.exerciseLog.filter(e=>e.date===today);
+  if(!sessions.length){alert('No sessions logged today to export.');return;}
+  // Build a GPX track for each session
+  const now=new Date();
+  let tracks='';
+  sessions.forEach((s,idx)=>{
+    const startTime=new Date(now.getTime()-((sessions.length-idx)*s.duration*60000));
+    const endTime=new Date(startTime.getTime()+s.duration*60000);
+    // Generate simple start/end trackpoints (no GPS data available)
+    tracks+=`  <trk>
+    <name>${s.type} — ${s.description||s.effort}</name>
+    <type>${s.type.replace(/[^a-zA-Z ]/g,'').trim()}</type>
+    <extensions><gpxtpx:TrackPointExtension><gpxtpx:cad>0</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+    <trkseg>
+      <trkpt lat="51.5074" lon="-0.1278"><ele>10</ele><time>${startTime.toISOString()}</time><extensions><gpxtpx:hr>${s.hr||0}</gpxtpx:hr></extensions></trkpt>
+      <trkpt lat="51.5074" lon="-0.1278"><ele>10</ele><time>${endTime.toISOString()}</time><extensions><gpxtpx:hr>${s.hr||0}</gpxtpx:hr></extensions></trkpt>
+    </trkseg>
+  </trk>\n`;
+  });
+  const gpx=`<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="LIFT App" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">
+  <metadata><name>LIFT Export ${today}</name><time>${now.toISOString()}</time></metadata>
+${tracks}</gpx>`;
+  const blob=new Blob([gpx],{type:'application/gpx+xml'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`lift-${today}.gpx`;
+  a.click();
+  alert('GPX downloaded!\n\nTo add to Strava:\n1. Open Strava → + → Upload Activity\n2. Select the .gpx file\n3. Edit the activity details and save');
 }
 
 // PWA INSTALL
