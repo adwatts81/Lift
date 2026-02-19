@@ -21,6 +21,8 @@
   var vars=themes[t]||themes.dark;
   var root=document.documentElement;
   Object.keys(vars).forEach(function(k){root.style.setProperty(k,vars[k]);});
+  // Also set background directly on html to prevent any flash
+  root.style.backgroundColor=vars['--bg'];
 })();
 </script>
 <style>
@@ -29,7 +31,7 @@
 --bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;transition:background .2s,color .2s;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;}
 
 /* AUTH */
 #authScreen{position:fixed;inset:0;background:var(–bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;transition:background .3s;}
@@ -1269,7 +1271,7 @@ function showAchievementToast(name){
 }
 
 // THEME
-const THEMES={
+var THEMES={
   dark:{
     '--bg':'#0e0e0e','--surface':'#141414','--card':'#1a1a1a','--border':'#272727',
     '--border2':'#3a3a3a','--text':'#efefef','--muted':'#5a5a5a','--muted2':'#888',
@@ -1286,13 +1288,20 @@ const THEMES={
   }
 };
 function setTheme(t){
-  const vars=THEMES[t]||THEMES.dark;
-  const root=document.documentElement;
-  Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
-  localStorage.setItem('lift_theme',t);
-  const isDark=t==='dark';
-  document.getElementById('themeDark').classList.toggle('active',isDark);
-  document.getElementById('themeLight').classList.toggle('active',!isDark);
+  var vars=THEMES[t]||THEMES.dark;
+  // Apply to both <html> and <body> to cover all inheritance paths
+  [document.documentElement, document.body].forEach(function(el){
+    Object.keys(vars).forEach(function(k){ el.style.setProperty(k, vars[k]); });
+  });
+  // Also force body background and text color directly - belt and braces
+  document.body.style.backgroundColor = vars['--bg'];
+  document.body.style.color = vars['--text'];
+  // Persist
+  try { localStorage.setItem('lift_theme', t); } catch(e) {}
+  // Update buttons
+  var dark = t === 'dark';
+  document.getElementById('themeDark').classList.toggle('active', dark);
+  document.getElementById('themeLight').classList.toggle('active', !dark);
 }
 // SETTINGS SYNC
 function syncCalGoalFromSettings(){
