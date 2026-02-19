@@ -18,7 +18,9 @@ html,body{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;transition:background .2s,color .2s;}
 
 /* AUTH */
-#authScreen{position:fixed;inset:0;background:var(–bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+#authScreen{position:fixed;inset:0;background:#0e0e0e;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;}
+header,nav,.sync-bar,main{visibility:hidden;}
+body.authed header,body.authed nav,body.authed .sync-bar,body.authed main{visibility:visible;}
 #authScreen.hidden{display:none;}
 .auth-logo{font-family:‘Bebas Neue’,sans-serif;font-size:72px;color:var(–accent);letter-spacing:4px;line-height:1;margin-bottom:8px;}
 .auth-sub{font-size:11px;letter-spacing:4px;color:var(–muted2);text-transform:uppercase;margin-bottom:48px;}
@@ -904,12 +906,12 @@ async function doRegister(){
   if(data.user)onSignedIn(data.user);
   else{errEl.textContent='Check your email to confirm your account, then sign in.';errEl.classList.add('show');}
 }
-async function doSignOut(){await sb.auth.signOut();currentUser=null;document.getElementById('authScreen').classList.remove('hidden');document.getElementById('userDropdown').classList.remove('show');}
+async function doSignOut(){await sb.auth.signOut();currentUser=null;document.body.classList.remove('authed');document.getElementById('authScreen').classList.remove('hidden');document.getElementById('userDropdown').classList.remove('show');}
 function toggleUserMenu(){document.getElementById('userDropdown').classList.toggle('show');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-menu'))document.getElementById('userDropdown').classList.remove('show');});
 async function onSignedIn(user){
   currentUser=user;
-  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.add('hidden');document.body.classList.add('authed');
   document.getElementById('userAvatar').textContent=user.email.slice(0,2).toUpperCase();
   document.getElementById('udEmail').textContent=user.email;
   renderWeekSched(); // now currentUser is set, rotation uses join date
