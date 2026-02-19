@@ -299,7 +299,7 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 @keyframes toastOut{from{opacity:1;}to{opacity:0;}}
 
 /* ONBOARDING */
-#onboardScreen{position:fixed;inset:0;background:var(–bg);z-index:900;display:none;flex-direction:column;overflow-y:auto;}
+#onboardScreen{position:fixed;inset:0;background:#0e0e0e;z-index:1100;display:none;flex-direction:column;overflow-y:auto;}
 #onboardScreen.show{display:flex;}
 .ob-header{padding:32px 24px 0;flex-shrink:0;}
 .ob-logo{font-family:‘Bebas Neue’,sans-serif;font-size:36px;color:var(–accent);letter-spacing:3px;}
@@ -441,6 +441,8 @@ body{transition:background .2s,color .2s;}
 
 </head>
 <body>
+<!-- Splash cover shown until auth resolves -->
+<div id="splashCover" style="position:fixed;inset:0;background:#0e0e0e;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div></div>
 
 <!-- AUTH SCREEN -->
 
@@ -906,12 +908,12 @@ async function doRegister(){
   if(data.user)onSignedIn(data.user);
   else{errEl.textContent='Check your email to confirm your account, then sign in.';errEl.classList.add('show');}
 }
-async function doSignOut(){await sb.auth.signOut();currentUser=null;document.body.classList.remove('authed');document.getElementById('authScreen').classList.remove('hidden');document.getElementById('userDropdown').classList.remove('show');}
+async function doSignOut(){await sb.auth.signOut();currentUser=null;document.body.classList.remove('authed');document.getElementById('splashCover').style.display='none';document.getElementById('authScreen').classList.remove('hidden');document.getElementById('userDropdown').classList.remove('show');}
 function toggleUserMenu(){document.getElementById('userDropdown').classList.toggle('show');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-menu'))document.getElementById('userDropdown').classList.remove('show');});
 async function onSignedIn(user){
   currentUser=user;
-  document.getElementById('authScreen').classList.add('hidden');document.body.classList.add('authed');
+  document.getElementById('authScreen').classList.add('hidden');document.body.classList.add('authed');document.getElementById('splashCover').style.display='none';
   document.getElementById('userAvatar').textContent=user.email.slice(0,2).toUpperCase();
   document.getElementById('udEmail').textContent=user.email;
   renderWeekSched(); // now currentUser is set, rotation uses join date
@@ -1406,7 +1408,12 @@ document.getElementById('loginEmail').addEventListener('keydown',e=>{if(e.key===
 // INIT
 (async()=>{
   const{data:{session}}=await sb.auth.getSession();
-  if(session?.user)onSignedIn(session.user);
+  if(session?.user){
+    onSignedIn(session.user);
+  } else {
+    // No session — show auth screen, hide splash
+    document.getElementById('splashCover').style.display='none';
+  }
   addIngredient();
 })();
 sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;}});
