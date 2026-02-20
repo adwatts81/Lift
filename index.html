@@ -2276,14 +2276,18 @@ async function confirmFoodLog(){
   if(!selectedFoodOption)return;
   const qty=parseFloat(document.getElementById('foodQtyInput').value)||1;
   const mealType=document.getElementById('mealTypeLog').value;
-  await addFoodEntry({
-    name:mealType+': '+selectedFoodOption.name+(qty!==1?' (x'+qty+')':''),
-    cals:Math.round(selectedFoodOption.cals*qty),
-    protein:Math.round(selectedFoodOption.protein_g*qty),
-    meal_type:mealType,
-    source:'ai'
-  });
-  resetFoodLog();
+  try{
+    await addFoodEntry({
+      name:mealType+': '+selectedFoodOption.name+(qty!==1?' (x'+qty+')':''),
+      cals:Math.round(selectedFoodOption.cals*qty),
+      protein:Math.round(selectedFoodOption.protein_g*qty),
+      meal_type:mealType,
+      source:'ai'
+    });
+    resetFoodLog();
+  }catch(e){
+    alert('Could not save: '+e.message);
+  }
 }
 
 function resetFoodLog(){
@@ -2295,9 +2299,10 @@ function resetFoodLog(){
 async function addFoodEntry(item){
   setSyncStatus('syncing');
   const entry={user_id:currentUser.id,date:todayKey(),...item};
-  const{data}=await sb.from('food_log').insert(entry).select().single();
+  const{data,error}=await sb.from('food_log').insert(entry).select().single();
+  if(error){setSyncStatus('error');throw new Error(error.message);}
   if(data)state.foodLog.push(data);
-  setSyncStatus('ok');renderFoodLog();updateGoalBar();updateDietSummary();updateOverview();updateStreaksAndAchievements();
+  setSyncStatus('ok');renderFoodLog();updateGoalBar();updateDietSummary();updateDashboard();updateStreaksAndAchievements();
 }
 function renderFoodLog(){
   const list=document.getElementById('mealLogList'),empty=document.getElementById('mealLogEmpty');
