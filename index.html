@@ -1453,7 +1453,10 @@ async function loadAllData(){
     state.exerciseLog=exercise.data||[];
     state.foodHistory=[...new Set((foodHistory.data||[]).map(r=>r.date))];
     state.exerciseHistory=[...new Set((exerciseHistory.data||[]).map(r=>r.date))];
-    if(prefs.data)state.prefs={...state.prefs,...prefs.data};
+    if(prefs.data){state.prefs={...state.prefs,...prefs.data};
+    // Load API key from Supabase into memory (never stored in source)
+    if(prefs.data.anthropic_key){ANTHROPIC_KEY=prefs.data.anthropic_key;localStorage.setItem('lift_anthropic_key',prefs.data.anthropic_key);}
+  }
     setSyncStatus('ok');
     applyPrefs();updateDashboard();renderFoodLog();renderExerciseLog();renderWeightLog();initWater();updateStreaksAndAchievements();initStrava();loadApiKeyUI();
   }catch(e){
@@ -2183,12 +2186,23 @@ function updateGoalBar(){
 function switchDietTab(t,el){document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.getElementById('dietTab-'+t).classList.add('active');if(t==='history')renderFoodLog();}
 
 // AI
-let ANTHROPIC_KEY=localStorage.getItem('lift_anthropic_key')||'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';
-function saveApiKey(){
+let ANTHROPIC_KEY=localStorage.getItem('lift_anthropic_key')||'';
+async function saveApiKey(){
   const val=document.getElementById('anthropicKeyInput').value.trim();
   ANTHROPIC_KEY=val;
-  if(val){localStorage.setItem('lift_anthropic_key',val);document.getElementById('apiKeyStatus').textContent='✓ Key saved — AI features enabled';document.getElementById('apiKeyStatus').style.color='#4caf50';}
-  else{localStorage.removeItem('lift_anthropic_key');document.getElementById('apiKeyStatus').textContent='Not set — AI features disabled';document.getElementById('apiKeyStatus').style.color='';}
+  if(val){
+    localStorage.setItem('lift_anthropic_key',val);
+    document.getElementById('apiKeyStatus').textContent='Saving...';
+    // Save to Supabase so it works on all devices
+    if(currentUser){await sb.from('user_prefs').upsert({user_id:currentUser.id,anthropic_key:val,cal_goal:state.prefs.cal_goal||2000,updated_at:new Date().toISOString()},{onConflict:'user_id'});}
+    document.getElementById('apiKeyStatus').textContent='✓ Key saved — AI features enabled';
+    document.getElementById('apiKeyStatus').style.color='#4caf50';
+  } else {
+    localStorage.removeItem('lift_anthropic_key');
+    if(currentUser){await sb.from('user_prefs').upsert({user_id:currentUser.id,anthropic_key:null,cal_goal:state.prefs.cal_goal||2000,updated_at:new Date().toISOString()},{onConflict:'user_id'});}
+    document.getElementById('apiKeyStatus').textContent='Not set — AI features disabled';
+    document.getElementById('apiKeyStatus').style.color='';
+  }
 }
 function loadApiKeyUI(){
   const k=localStorage.getItem('lift_anthropic_key')||'';
