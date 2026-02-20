@@ -2586,141 +2586,221 @@ async function exportData(){
   const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lift-data.csv';a.click();
 }
 
-// STRAVA IMPORT — OAuth with auto-refresh
-const STRAVA_CLIENT_ID='581149';
-const STRAVA_CLIENT_SECRET='7296ba54135e9adf75e9c89f6c3c9bad470394d2';
-const STRAVA_REFRESH_TOKEN='adddf7eead17470f0746b0591521fe37ab0a8173';
+// STRAVA IMPORT — via Supabase Edge Functions (SECURE)
+// Requires these Edge Functions to exist in Supabase:
+// - strava-start       (JWT required) -> returns { url }
+// - strava-status      (JWT required) -> returns { connected, athlete_name, athlete_id }
+// - strava-activities  (JWT required) -> returns { activities: [...] }
+// - strava-disconnect  (JWT required) -> disconnects + deletes token row
 
-async function getStravaAccessToken(){
-  // Check if we have a cached token that's still valid (expires in >5 min)
-  const cached=localStorage.getItem('strava_access_token');
-  const expiry=parseInt(localStorage.getItem('strava_token_expiry')||'0');
-  if(cached && Date.now()/1000 < expiry-300) return cached;
-  // Refresh the token
-  const res=await fetch('https://www.strava.com/oauth/token',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      client_id:STRAVA_CLIENT_ID,
-      client_secret:STRAVA_CLIENT_SECRET,
-      refresh_token:STRAVA_REFRESH_TOKEN,
-      grant_type:'refresh_token'
-    })
-  });
-  if(!res.ok) throw new Error('Could not refresh Strava token');
-  const data=await res.json();
-  localStorage.setItem('strava_access_token',data.access_token);
-  localStorage.setItem('strava_token_expiry',data.expires_at.toString());
-  return data.access_token;
+async function invokeFn(fnName, body = null) {
+  if (!sb) throw new Error('Supabase not initialised');
+  if (!currentUser) throw new Error('You must be signed in');
+
+  const { data, error } = await sb.functions.invoke(fnName, body ? { body } : undefined);
+  if (error) {
+    // Supabase function errors can be terse; improve message
+    throw new Error(error.message || `Function ${fnName} failed`);
+  }
+  return data;
 }
 
-async function connectStrava(){
-  const btn=document.querySelector('#stravaNotConnected .btn-ex');
-  if(btn){btn.disabled=true;btn.textContent='Connecting...';}
-  try{
-    const token=await getStravaAccessToken();
-    const res=await fetch('https://www.strava.com/api/v3/athlete',{headers:{Authorization:'Bearer '+token}});
-    if(!res.ok) throw new Error('Could not verify Strava connection');
-    const athlete=await res.json();
-    const name=athlete.firstname+' '+athlete.lastname;
-    localStorage.setItem('strava_athlete',name);
-    showStravaConnected(name);
-  }catch(e){
-    if(btn){btn.disabled=false;btn.textContent='Connect Strava';}
-    alert('Could not connect to Strava: '+e.message);
+async function connectStrava() {
+  const btn = document.querySelector('#stravaNotConnected .btn-ex');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting...'; }
+
+  try {
+    const data = await invokeFn('strava-start');
+    if (!data?.url) throw new Error('No authorisation URL returned');
+
+    // Redirect user to Strava OAuth consent screen
+    window.location.href = data.url;
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Connect Strava'; }
+    alert('Could not start Strava connection.\n\n' + (e.message || e.toString()));
   }
 }
-function showStravaConnected(name){
-  document.getElementById('stravaNotConnected').style.display='none';
-  document.getElementById('stravaConnected').style.display='block';
-  document.getElementById('stravaAthleteInfo').textContent=name||'Connected';
+
+function showStravaConnected(name) {
+  document.getElementById('stravaNotConnected').style.display = 'none';
+  document.getElementById('stravaConnected').style.display = 'block';
+  document.getElementById('stravaAthleteInfo').textContent = name || 'Connected';
 }
-function disconnectStrava(){
-  try{
-    localStorage.removeItem('strava_token');
-    localStorage.removeItem('strava_access_token');
-    localStorage.removeItem('strava_token_expiry');
-    localStorage.removeItem('strava_athlete');
-  }catch(e){}
-  document.getElementById('stravaNotConnected').style.display='block';
-  document.getElementById('stravaConnected').style.display='none';
-  document.getElementById('stravaSetupPanel').style.display='none';
-  document.getElementById('stravaImportResults').innerHTML='';
-}
-async function importFromStrava(){
-  let token;
-  try{token=await getStravaAccessToken();}catch(e){alert('Could not connect to Strava: '+e.message);return;}
-  if(!token){alert('Strava not connected');return;}
-  const days=parseInt(document.getElementById('stravaImportDays').value)||7;
-  const after=Math.floor(Date.now()/1000)-(days*86400);
-  document.getElementById('stravaThinking').classList.add('show');
-  document.getElementById('stravaImportResults').innerHTML='';
-  try{
-    const res=await fetch('https://www.strava.com/api/v3/athlete/activities?after='+after+'&per_page=30',{headers:{Authorization:'Bearer '+token}});
-    if(!res.ok){throw new Error('Strava API error '+res.status);}
-    const activities=await res.json();
-    if(!activities.length){document.getElementById('stravaImportResults').innerHTML='<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No activities found in this period.</div>';document.getElementById('stravaThinking').classList.remove('show');return;}
-    // Cache activities by ID for safe onclick reference
-    window._stravaCache={};
-    activities.forEach(function(a){window._stravaCache[a.id]=a;});
-    const allLogged=[...state.exerciseLog,...(state.exerciseHistory||[])];
-    const html=activities.map(function(a){
-      const typeMap={Run:'🏃 Running',Ride:'🚴 Cycling',VirtualRide:'🚴 Cycling',Walk:'⚡ Other',Swim:'⚡ Other',WeightTraining:'🏋️ Weights',Workout:'🏋️ Weights',Yoga:'⚡ Other',Hike:'⚡ Other'};
-      const liftType=typeMap[a.type]||'⚡ Other';
-      const km=a.distance?(a.distance/1000).toFixed(1)+'km':'';
-      const mins=Math.round(a.moving_time/60);
-      const cals=a.calories||0;
-      const date=a.start_date_local?a.start_date_local.slice(0,10):todayKey();
-      const alreadyLogged=allLogged.some(function(e){return e.notes&&e.notes.indexOf('ID:'+a.id)!==-1;});
-      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:12px;">'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+liftType+' '+a.name+'</div>'
-          +'<div style="color:var(--muted);font-size:11px;">'+date+' · '+mins+'min'+(km?' · '+km:'')+'</div>'
-        +'</div>'
-        +'<div style="color:var(--exlog);font-size:13px;font-weight:600;flex-shrink:0;">'+(cals?cals+' kcal':'')+'</div>'
-        +(alreadyLogged
-          ?'<span style="font-size:11px;color:var(--muted);flex-shrink:0;">✓ logged</span>'
-          :'<button class="btn btn-ex" style="font-size:11px;padding:5px 10px;flex-shrink:0;" onclick="logStravaActivity(window._stravaCache['+a.id+'])">Add</button>')
-        +'</div>';
-    }).join('');
-    document.getElementById('stravaImportResults').innerHTML=html;
-  }catch(e){alert('Could not fetch from Strava. Try again.');}
-  document.getElementById('stravaThinking').classList.remove('show');
-}
-async function logStravaActivity(a){
-  const typeMap={Run:'🏃 Running',Ride:'🚴 Cycling',VirtualRide:'🚴 Cycling',Walk:'⚡ Other',Swim:'⚡ Other',WeightTraining:'🏋️ Weights',Workout:'🏋️ Weights',Yoga:'⚡ Other',Hike:'⚡ Other'};
-  const liftType=typeMap[a.type]||'⚡ Other';
-  const km=a.distance?(a.distance/1000).toFixed(1):null;
-  const mins=Math.round(a.moving_time/60);
-  const cals=a.calories||0;
-  const date=a.start_date_local?a.start_date_local.slice(0,10):todayKey();
-  const hr=a.average_heartrate?Math.round(a.average_heartrate):null;
-  const entry={user_id:currentUser.id,date:date,type:liftType,duration:mins,distance:km?parseFloat(km):null,hr:hr,effort:'Moderate',notes:'Imported from Strava (ID:'+a.id+')',cals:cals,description:a.name||liftType};
-  try{
-    setSyncStatus('syncing');
-    const{data,error}=await sb.from('exercise_log').insert(entry).select().single();
-    if(error)throw error;
-    if(data){
-      if(date===todayKey()){state.exerciseLog.push(data);}
-      else{if(!state.exerciseHistory)state.exerciseHistory=[];state.exerciseHistory.push(data);}
+
+async function initStrava() {
+  // Called after loadAllData() in your app
+  try {
+    if (!currentUser) return;
+
+    const status = await invokeFn('strava-status');
+    if (status?.connected) {
+      const athleteName = status.athlete_name || 'Connected';
+      localStorage.setItem('strava_athlete', athleteName);
+      showStravaConnected(athleteName);
+    } else {
+      document.getElementById('stravaNotConnected').style.display = 'block';
+      document.getElementById('stravaConnected').style.display = 'none';
+      document.getElementById('stravaImportResults').innerHTML = '';
     }
-    setSyncStatus('ok');
-    renderExerciseLog();updateOverview();updateStreaksAndAchievements();
-    importFromStrava();
-  }catch(e){setSyncStatus('error');alert('Could not save. Try again.');}
+  } catch (e) {
+    // Don’t block the UI if status fails
+    document.getElementById('stravaNotConnected').style.display = 'block';
+    document.getElementById('stravaConnected').style.display = 'none';
+  }
 }
-function initStrava(){
-  let token,name;
-  try{token=localStorage.getItem('strava_access_token');name=localStorage.getItem('strava_athlete');}catch(e){}
-  if(token)showStravaConnected(name);
-  else{
-    // Auto-connect on load — token refreshes silently
-    getStravaAccessToken().then(t=>{
-      if(t){
-        const n=localStorage.getItem('strava_athlete');
-        if(n) showStravaConnected(n);
+
+async function disconnectStrava() {
+  try {
+    await invokeFn('strava-disconnect');
+  } catch (e) {
+    alert('Could not disconnect Strava.\n\n' + (e.message || e.toString()));
+    return;
+  }
+
+  try {
+    localStorage.removeItem('strava_athlete');
+  } catch (e) {}
+
+  document.getElementById('stravaNotConnected').style.display = 'block';
+  document.getElementById('stravaConnected').style.display = 'none';
+  document.getElementById('stravaImportResults').innerHTML = '';
+}
+
+async function importFromStrava() {
+  const days = parseInt(document.getElementById('stravaImportDays').value) || 7;
+
+  document.getElementById('stravaThinking').classList.add('show');
+  document.getElementById('stravaImportResults').innerHTML = '';
+
+  try {
+    const payload = await invokeFn('strava-activities', { days });
+    const activities = payload?.activities || [];
+
+    if (!activities.length) {
+      document.getElementById('stravaImportResults').innerHTML =
+        '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No activities found in this period.</div>';
+      return;
+    }
+
+    // Cache activities for the "Add" buttons
+    window._stravaCache = {};
+    activities.forEach(a => window._stravaCache[a.id] = a);
+
+    // Prevent duplicates: check which Strava IDs are already imported for this user
+    const ids = activities.map(a => String(a.id));
+    const { data: existing, error: exErr } = await sb
+      .from('exercise_log')
+      .select('strava_id')
+      .eq('user_id', currentUser.id)
+      .in('strava_id', ids);
+
+    if (exErr) throw new Error('Could not check existing imports');
+
+    const importedSet = new Set((existing || []).map(r => String(r.strava_id)));
+
+    const html = activities.map(a => {
+      const date = a.start_date_local ? a.start_date_local.slice(0, 10) : todayKey();
+      const mins = Math.round((a.moving_time || 0) / 60);
+      const km = a.distance ? (a.distance / 1000).toFixed(1) + 'km' : '';
+      const alreadyLogged = importedSet.has(String(a.id));
+
+      return `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              🟠 ${a.type || 'Activity'} · ${a.name || 'Untitled'}
+            </div>
+            <div style="color:var(--muted);font-size:11px;">
+              ${date} · ${mins}min${km ? ' · ' + km : ''}
+            </div>
+          </div>
+          ${alreadyLogged
+            ? '<span style="font-size:11px;color:var(--muted);flex-shrink:0;">✓ logged</span>'
+            : `<button class="btn btn-ex" style="font-size:11px;padding:5px 10px;flex-shrink:0;" onclick="logStravaActivity(window._stravaCache[${a.id}])">Add</button>`
+          }
+        </div>`;
+    }).join('');
+
+    document.getElementById('stravaImportResults').innerHTML = html;
+
+  } catch (e) {
+    alert('Could not fetch from Strava.\n\n' + (e.message || e.toString()));
+  } finally {
+    document.getElementById('stravaThinking').classList.remove('show');
+  }
+}
+
+async function logStravaActivity(a) {
+  if (!a) return;
+
+  // Map Strava types to your existing internal types
+  const typeMap = {
+    Run: '🏃 Running',
+    Ride: '🚴 Cycling',
+    VirtualRide: '🚴 Cycling',
+    Walk: '⚡ Other',
+    Swim: '🏊 Swimming',
+    WeightTraining: '🏋️ Weights',
+    Workout: '🏋️ Weights',
+    Yoga: '⚡ Other',
+    Hike: '⚡ Other'
+  };
+
+  const liftType = typeMap[a.type] || '⚡ Other';
+  const km = a.distance ? (a.distance / 1000) : null;
+  const mins = Math.round((a.moving_time || 0) / 60);
+  const cals = a.calories ? Math.round(a.calories) : 0;
+  const date = a.start_date_local ? a.start_date_local.slice(0, 10) : todayKey();
+  const hr = a.average_heartrate ? Math.round(a.average_heartrate) : null;
+
+  const entry = {
+    user_id: currentUser.id,
+    date,
+    type: liftType,
+    duration: mins,
+    distance: km,
+    hr,
+    effort: 'Moderate',
+    cals,
+    description: a.name || liftType,
+    notes: 'Imported from Strava',
+    strava_id: String(a.id)   // IMPORTANT: enables duplicate protection + unique index
+  };
+
+  try {
+    setSyncStatus('syncing');
+
+    // With your unique index (user_id, strava_id), duplicates will be prevented.
+    const { data, error } = await sb.from('exercise_log').insert(entry).select().single();
+
+    if (error) {
+      // Friendly handling for duplicate imports (unique index violation)
+      const msg = (error.message || '').toLowerCase();
+      if (msg.includes('duplicate') || msg.includes('unique')) {
+        alert('That activity is already logged.');
+      } else {
+        throw error;
       }
-    }).catch(()=>{});
+      setSyncStatus('ok');
+      return;
+    }
+
+    // Update local state only if it’s for today (your app only loads today into state.exerciseLog)
+    if (data) {
+      if (date === todayKey()) state.exerciseLog.push(data);
+    }
+
+    setSyncStatus('ok');
+    renderExerciseLog();
+    updateOverview();
+    updateStreaksAndAchievements();
+
+    // Refresh import list (will now show ✓ logged)
+    importFromStrava();
+
+  } catch (e) {
+    setSyncStatus('error');
+    alert('Could not save Strava activity.\n\n' + (e.message || e.toString()));
   }
 }
 // PWA INSTALL
