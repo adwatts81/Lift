@@ -882,9 +882,11 @@ body{transition:background .3s,color .3s;}
         <button class="btn btn-ex btn-block" onclick="showStravaSetup()" style="margin-bottom:8px;">Connect Strava</button>
         <div id="stravaSetupPanel" style="display:none;">
           <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
-            1. Go to <strong style="color:var(--text);">strava.com/settings/api</strong> → create an app<br>
-            2. Copy your <strong style="color:var(--text);">Access Token</strong><br>
-            3. Paste it below
+            Strava personal tokens expire every 6 hours. To get a fresh one:<br><br>
+            1. Go to <strong style="color:var(--text);">strava.com/settings/api</strong><br>
+            2. Scroll to <strong style="color:var(--text);">"Your Access Token"</strong> and copy it<br>
+            3. Paste below — repeat when it expires<br><br>
+            <span style="color:#e8a838;">⚠️ Tokens expire every 6 hours — this is a Strava limitation.</span>
           </div>
           <input type="password" id="stravaTokenInput" placeholder="Paste Strava access token" style="margin-bottom:8px;font-size:13px;">
           <button class="btn btn-ex btn-block" onclick="saveStravaToken()">Save & Connect</button>
@@ -939,8 +941,15 @@ body{transition:background .3s,color .3s;}
     <div class="goalbar-labels"><span id="glLeft">2000 remaining</span><span id="glPct">0%</span></div>
   </div>
   <div class="water-card">
-    <div class="water-header"><span class="water-title">💧 Water Intake</span><span class="water-count" id="waterCountDisplay">0 / 8</span></div>
+    <div class="water-header">
+      <span class="water-title">💧 Water Intake</span>
+      <span class="water-count" id="waterCountDisplay">0 / 8</span>
+    </div>
     <div class="water-glasses" id="waterGlasses"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn" style="flex:1;padding:10px;font-size:13px;" onclick="adjustWater(-1)">− Remove</button>
+      <button class="btn btn-diet" style="flex:1;padding:10px;font-size:13px;" onclick="adjustWater(1)">+ Add Glass</button>
+    </div>
   </div>
   <div class="tabs">
     <div class="tab active" onclick="switchDietTab('log',this)">Log Food</div>
@@ -2171,6 +2180,15 @@ function initWater(){
   const dwc=document.getElementById('dietWaterCount');if(dwc)dwc.textContent=w+'/8';
 }
 async function toggleGlass(i){state.prefs.water=(i<(state.prefs.water||0))?i:i+1;initWater();await sb.from('user_prefs').upsert({user_id:currentUser.id,water:state.prefs.water,cal_goal:state.prefs.cal_goal||2000,updated_at:new Date().toISOString()},{onConflict:'user_id'});updateStreaksAndAchievements();}
+async function adjustWater(delta){
+  const current=state.prefs.water||0;
+  const newVal=Math.max(0,Math.min(8,current+delta));
+  if(newVal===current)return;
+  state.prefs.water=newVal;
+  initWater();
+  await sb.from('user_prefs').upsert({user_id:currentUser.id,water:newVal,cal_goal:state.prefs.cal_goal||2000,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  updateStreaksAndAchievements();
+}
 
 // GOAL BAR
 function updateGoalBar(){
@@ -2622,7 +2640,7 @@ async function importFromStrava(){
   document.getElementById('stravaImportResults').innerHTML='';
   try{
     const res=await fetch('https://www.strava.com/api/v3/athlete/activities?after='+after+'&per_page=30',{headers:{Authorization:'Bearer '+token}});
-    if(!res.ok){if(res.status===401){alert('Strava token expired. Please reconnect.');disconnectStrava();}else throw new Error('Strava API error');document.getElementById('stravaThinking').classList.remove('show');return;}
+    if(!res.ok){if(res.status===401){disconnectStrava();alert('Strava token expired — tokens last ~6 hours.\n\nTo reconnect:\n1. Go to strava.com/settings/api\n2. Copy your Access Token\n3. Tap Connect Strava and paste it in');}else throw new Error('Strava API error');document.getElementById('stravaThinking').classList.remove('show');return;}
     const activities=await res.json();
     if(!activities.length){document.getElementById('stravaImportResults').innerHTML='<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px;">No activities found in this period.</div>';document.getElementById('stravaThinking').classList.remove('show');return;}
     // Cache activities by ID for safe onclick reference
