@@ -1,2 +1,2 @@
 # Lift
-Lift training and fitness
+Fitness OS
