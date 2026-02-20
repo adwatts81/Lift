@@ -1,2 +1,2 @@
 # Lift
-Fitness OS
+Fitness
