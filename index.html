@@ -951,11 +951,32 @@ body{transition:background .3s,color .3s;}
   <div class="tab-panel active" id="dietTab-log">
     <div class="food-input-card">
       <div class="fi-title">Log a Meal</div>
-      <div class="fi-sub">Describe what you ate — AI estimates calories. E.g. "M&S coronation chicken sandwich" or "flat white from Wildcard"</div>
+      <div class="fi-sub">Describe what you ate and AI will find options to choose from.</div>
       <div class="meal-type-row"><select id="mealTypeLog"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div>
-      <textarea id="mealDescInput" rows="2" placeholder="Describe your meal..." style="margin-bottom:8px;"></textarea>
-      <div class="thinking" id="logThinking"><div class="spinner"></div>AI estimating calories...</div>
-      <button class="btn btn-diet btn-block" onclick="logMealAI()">Estimate & Log</button>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <textarea id="mealDescInput" rows="2" placeholder="e.g. flat white, M&S chicken sandwich..." style="flex:1;margin:0;"></textarea>
+        <button class="btn btn-diet" style="align-self:flex-end;white-space:nowrap;padding:10px 16px;" onclick="findFoodOptions()">Find</button>
+      </div>
+      <div class="thinking" id="logThinking"><div class="spinner"></div>Finding options...</div>
+      <!-- Results list -->
+      <div id="foodOptionsList" style="display:none;margin-bottom:8px;"></div>
+      <!-- Confirm panel -->
+      <div id="foodConfirmPanel" style="display:none;background:var(--card2,#1e1e1e);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div id="foodConfirmName" style="font-weight:600;font-size:14px;margin-bottom:4px;"></div>
+        <div id="foodConfirmMacros" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <label style="font-size:12px;color:var(--muted);white-space:nowrap;">Quantity</label>
+          <input type="number" id="foodQtyInput" value="1" min="0.25" step="0.25" style="width:70px;text-align:center;">
+          <span id="foodQtyUnit" style="font-size:12px;color:var(--muted);">serving</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div id="foodConfirmTotal" style="font-size:13px;font-weight:600;color:var(--accent);"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" style="padding:8px 14px;font-size:12px;" onclick="resetFoodLog()">Back</button>
+            <button class="btn btn-diet" style="padding:8px 14px;font-size:12px;" onclick="confirmFoodLog()">Log It</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="tab-panel" id="dietTab-camera">
@@ -2162,7 +2183,7 @@ function updateGoalBar(){
 function switchDietTab(t,el){document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.getElementById('dietTab-'+t).classList.add('active');if(t==='history')renderFoodLog();}
 
 // AI
-let ANTHROPIC_KEY=localStorage.getItem('lift_anthropic_key')||'';
+let ANTHROPIC_KEY=localStorage.getItem('lift_anthropic_key')||'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';
 function saveApiKey(){
   const val=document.getElementById('anthropicKeyInput').value.trim();
   ANTHROPIC_KEY=val;
@@ -2187,12 +2208,75 @@ async function callClaude(prompt,maxTokens=500){
 }
 
 // MEAL LOGGING
-async function logMealAI(){
-  const desc=document.getElementById('mealDescInput').value.trim();if(!desc)return;
-  const mealType=document.getElementById('mealTypeLog').value,thinking=document.getElementById('logThinking');
+let selectedFoodOption=null;
+
+async function findFoodOptions(){
+  const desc=document.getElementById('mealDescInput').value.trim();
+  if(!desc)return;
+  const thinking=document.getElementById('logThinking');
+  const optsList=document.getElementById('foodOptionsList');
+  const confirmPanel=document.getElementById('foodConfirmPanel');
+  optsList.style.display='none';
+  confirmPanel.style.display='none';
+  selectedFoodOption=null;
   thinking.classList.add('show');
-  try{const raw=await callClaude(`Nutrition expert. User ate: "${desc}". Estimate calories and protein. Respond ONLY valid JSON: {"name":"short name","cals":number,"protein_g":number}`);const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());await addFoodEntry({name:`${mealType}: ${parsed.name}`,cals:parsed.cals,protein:parsed.protein_g,meal_type:mealType,source:'ai'});document.getElementById('mealDescInput').value='';}catch(e){alert('Could not estimate. Try again.');}
-  thinking.classList.remove('show');
+  try{
+    const raw=await callClaude('Nutrition expert. The user described: "'+desc+'". Return 3 realistic options they might mean. For each, include a short name, serving unit, typical serving size, calories and protein. Respond ONLY valid JSON array: [{"name":"short name","unit":"serving unit e.g. cup/piece/g/ml","serving_size":"e.g. 250ml or 1 slice","cals":number,"protein_g":number},...].',600);
+    const opts=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    thinking.classList.remove('show');
+    optsList.innerHTML=opts.map(function(o,i){return '<div onclick="selectFoodOption('+i+')" style="background:var(--card2,#1e1e1e);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:600;">'+o.name+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">'+o.serving_size+' &middot; '+o.protein_g+'g protein</div></div><div style="text-align:right;"><div style="font-size:16px;font-weight:700;color:var(--accent);">'+o.cals+'</div><div style="font-size:10px;color:var(--muted);">kcal</div></div></div>';}).join('');
+    optsList._data=opts;
+    optsList.style.display='block';
+  }catch(e){
+    thinking.classList.remove('show');
+    alert('Could not find options. Try again.');
+  }
+}
+
+function selectFoodOption(idx){
+  const optsList=document.getElementById('foodOptionsList');
+  const opts=optsList._data;
+  selectedFoodOption=opts[idx];
+  Array.from(optsList.children).forEach(function(el,i){
+    el.style.borderColor=i===idx?'var(--accent)':'var(--border)';
+  });
+  const panel=document.getElementById('foodConfirmPanel');
+  document.getElementById('foodConfirmName').textContent=selectedFoodOption.name;
+  document.getElementById('foodConfirmMacros').textContent=selectedFoodOption.serving_size+' · '+selectedFoodOption.cals+' kcal · '+selectedFoodOption.protein_g+'g protein';
+  document.getElementById('foodQtyInput').value=1;
+  document.getElementById('foodQtyUnit').textContent=selectedFoodOption.unit||'serving';
+  updateConfirmTotal();
+  panel.style.display='block';
+  document.getElementById('foodQtyInput').oninput=updateConfirmTotal;
+}
+
+function updateConfirmTotal(){
+  if(!selectedFoodOption)return;
+  const qty=parseFloat(document.getElementById('foodQtyInput').value)||1;
+  const totalCals=Math.round(selectedFoodOption.cals*qty);
+  const totalProt=Math.round(selectedFoodOption.protein_g*qty);
+  document.getElementById('foodConfirmTotal').textContent=totalCals+' kcal · '+totalProt+'g protein';
+}
+
+async function confirmFoodLog(){
+  if(!selectedFoodOption)return;
+  const qty=parseFloat(document.getElementById('foodQtyInput').value)||1;
+  const mealType=document.getElementById('mealTypeLog').value;
+  await addFoodEntry({
+    name:mealType+': '+selectedFoodOption.name+(qty!==1?' (x'+qty+')':''),
+    cals:Math.round(selectedFoodOption.cals*qty),
+    protein:Math.round(selectedFoodOption.protein_g*qty),
+    meal_type:mealType,
+    source:'ai'
+  });
+  resetFoodLog();
+}
+
+function resetFoodLog(){
+  document.getElementById('mealDescInput').value='';
+  document.getElementById('foodOptionsList').style.display='none';
+  document.getElementById('foodConfirmPanel').style.display='none';
+  selectedFoodOption=null;
 }
 async function addFoodEntry(item){
   setSyncStatus('syncing');
