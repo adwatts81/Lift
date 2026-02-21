@@ -1,7 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SERVICE_ROLE =
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY");
+
+if (!SUPABASE_URL) throw new Error("Missing SUPABASE_URL");
+if (!SERVICE_ROLE) throw new Error("Missing service role key (SUPABASE_SERVICE_ROLE_KEY or SERVICE_ROLE_KEY)");
 
 export function supabaseAdmin() {
   return createClient(SUPABASE_URL, SERVICE_ROLE, {
