@@ -11,7 +11,8 @@ export function corsHeaders(origin?: string) {
 
 export function preflight(req: Request) {
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
+    // IMPORTANT: 204 must not include a body
+    return new Response(null, {
       status: 204,
       headers: corsHeaders(req.headers.get("Origin") ?? undefined),
     });
