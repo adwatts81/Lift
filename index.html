@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LIFT">
-<meta name="theme-color" content="#0e0e0e">
+<meta name="theme-color" content="#090909">
 <title>LIFT \u2014 Athlete OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,23 +14,562 @@
 (function(){
   var t=localStorage.getItem('lift_theme')||'dark';
   var themes={
-    dark:{'--bg':'#0e0e0e','--surface':'#141414','--card':'#1a1a1a','--border':'#272727','--border2':'#3a3a3a','--text':'#efefef','--muted':'#5a5a5a','--muted2':'#888','--input-bg':'#141414','--accent':'#e8ff47','--accent2':'#ff6b35','--push':'#3b82f6','--pull':'#10b981','--full':'#f59e0b','--diet':'#c084fc','--weight':'#fb7185','--exlog':'#34d399','--blue':'#60a5fa','--danger':'#ef4444'},
-    light:{'--bg':'#f0f0ec','--surface':'#e4e4e0','--card':'#ffffff','--border':'#d4d4d0','--border2':'#b8b8b4','--text':'#111111','--muted':'#888888','--muted2':'#555555','--input-bg':'#f8f8f6','--accent':'#5a8a00','--accent2':'#d4460a','--push':'#2563eb','--pull':'#059669','--full':'#d97706','--diet':'#9333ea','--weight':'#e11d48','--exlog':'#059669','--blue':'#2563eb','--danger':'#dc2626'}
+    dark:{
+      '--bg':'#090909',
+      '--bg2':'#0f0f0f',
+      '--surface':'rgba(255,255,255,0.04)',
+      '--surface2':'rgba(255,255,255,0.07)',
+      '--card':'rgba(255,255,255,0.06)',
+      '--card2':'rgba(255,255,255,0.09)',
+      '--glass':'rgba(15,15,15,0.72)',
+      '--glass-border':'rgba(255,255,255,0.10)',
+      '--border':'rgba(255,255,255,0.09)',
+      '--border2':'rgba(255,255,255,0.16)',
+      '--text':'#f2f2f2',
+      '--text2':'#c8c8c8',
+      '--muted':'rgba(255,255,255,0.35)',
+      '--muted2':'rgba(255,255,255,0.55)',
+      '--input-bg':'rgba(255,255,255,0.05)',
+      '--accent':'#c8ff00',
+      '--accent-dim':'rgba(200,255,0,0.12)',
+      '--accent-glow':'rgba(200,255,0,0.25)',
+      '--accent2':'#ff6b35',
+      '--push':'#4f8cff',
+      '--pull':'#22d88f',
+      '--full':'#ffbe00',
+      '--diet':'#bf7fff',
+      '--weight':'#ff6b8a',
+      '--exlog':'#3de8a0',
+      '--blue':'#5ab4ff',
+      '--danger':'#ff4d4d',
+      '--tab-bg':'rgba(12,12,12,0.88)'
+    },
+    light:{
+      '--bg':'#f5f5f7',
+      '--bg2':'#ebebed',
+      '--surface':'rgba(255,255,255,0.70)',
+      '--surface2':'rgba(255,255,255,0.88)',
+      '--card':'rgba(255,255,255,0.80)',
+      '--card2':'rgba(255,255,255,0.95)',
+      '--glass':'rgba(245,245,247,0.80)',
+      '--glass-border':'rgba(0,0,0,0.08)',
+      '--border':'rgba(0,0,0,0.08)',
+      '--border2':'rgba(0,0,0,0.15)',
+      '--text':'#0d0d0d',
+      '--text2':'#2a2a2a',
+      '--muted':'rgba(0,0,0,0.38)',
+      '--muted2':'rgba(0,0,0,0.58)',
+      '--input-bg':'rgba(0,0,0,0.04)',
+      '--accent':'#6ab000',
+      '--accent-dim':'rgba(106,176,0,0.10)',
+      '--accent-glow':'rgba(106,176,0,0.20)',
+      '--accent2':'#e0501a',
+      '--push':'#2563eb',
+      '--pull':'#059669',
+      '--full':'#d97706',
+      '--diet':'#9333ea',
+      '--weight':'#e11d48',
+      '--exlog':'#059669',
+      '--blue':'#2563eb',
+      '--danger':'#dc2626',
+      '--tab-bg':'rgba(245,245,247,0.90)'
+    }
   };
-  var vars=themes[t]||themes.dark;
+  var resolved = t;
+  if(t === 'auto') resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  var vars=themes[resolved]||themes.dark;
   var root=document.documentElement;
   Object.keys(vars).forEach(function(k){root.style.setProperty(k,vars[k]);});
-  // Also set background directly on html to prevent any flash
   root.style.backgroundColor=vars['--bg'];
 })();
 </script>
 <style>
-:root{--accent:#e8ff47;--accent2:#ff6b35;--push:#3b82f6;--pull:#10b981;--full:#f59e0b;--diet:#c084fc;--weight:#fb7185;--exlog:#34d399;--blue:#60a5fa;--danger:#ef4444;
-/* Dark theme defaults - overridden by html[data-theme] below */
---bg:#0e0e0e;--surface:#141414;--card:#1a1a1a;--border:#272727;--border2:#3a3a3a;--text:#efefef;--muted:#5a5a5a;--muted2:#888;--input-bg:#141414;}
+:root{
+  --accent:#c8ff00;--accent-dim:rgba(200,255,0,.12);--accent-glow:rgba(200,255,0,.25);
+  --accent2:#ff6b35;--push:#4f8cff;--pull:#22d88f;--full:#ffbe00;
+  --diet:#bf7fff;--weight:#ff6b8a;--exlog:#3de8a0;--blue:#5ab4ff;--danger:#ff4d4d;
+  /* Dark defaults — JS overrides on load */
+  --bg:#090909;--bg2:#0f0f0f;
+  --surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --card:rgba(255,255,255,.06);--card2:rgba(255,255,255,.09);
+  --glass:rgba(15,15,15,.72);--glass-border:rgba(255,255,255,.10);
+  --border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.16);
+  --text:#f2f2f2;--text2:#c8c8c8;
+  --muted:rgba(255,255,255,.35);--muted2:rgba(255,255,255,.55);
+  --input-bg:rgba(255,255,255,.05);
+  --tab-bg:rgba(12,12,12,.88);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+  --tab-h:64px;
+  --radius:16px;--radius-sm:12px;--radius-xs:9px;
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px;}
+/* ══════════════════════════════════════════
+   LIFT v3.2  ·  iOS Glass Design System
+   Mobile-first · Dark + Light mode
+══════════════════════════════════════════ */
+
+/* ── BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);
+  /* Subtle mesh gradient background */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(200,255,0,.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(79,140,255,.05) 0%,transparent 60%);
+  background-attachment:fixed;
+}
+
+/* Light mode bg override */
+html[style*="--bg:#f5f5f7"] body,
+body.theme-light{
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(106,176,0,.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(37,99,235,.04) 0%,transparent 60%);
+}
+
+main{padding:12px 14px 0;}
+
+/* ── GLASS MIXIN UTILITY ── */
+.glass{
+  background:var(--card);
+  backdrop-filter:blur(20px) saturate(1.5);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  border:1px solid var(--glass-border);
+}
+
+/* ── BOTTOM TAB BAR ── */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--tab-h) + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:var(--tab-bg);
+  backdrop-filter:blur(40px) saturate(1.8);
+  -webkit-backdrop-filter:blur(40px) saturate(1.8);
+  border-top:0.5px solid var(--glass-border);
+  display:flex;align-items:flex-start;justify-content:space-around;
+  padding-top:8px;z-index:500;
+  /* subtle top glow line */
+  box-shadow:0 -1px 0 var(--glass-border), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.nb{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;
+  color:var(--muted);cursor:pointer;padding:0 2px;
+  transition:color .2s cubic-bezier(.4,0,.2,1);
+  letter-spacing:.2px;max-width:72px;
+  position:relative;
+}
+.nb .tab-icon{
+  font-size:22px;line-height:1;display:block;margin-bottom:2px;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.nb.active{color:var(--accent);}
+.nb.active .tab-icon{transform:scale(1.12) translateY(-1px);}
+/* Active indicator dot */
+.nb.active::after{
+  content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 6px var(--accent-glow);
+}
+
+/* Desktop sidebar */
+.nav-logo{display:none;}
+
+/* ── HEADER ── */
+header{
+  padding:calc(var(--safe-top) + 14px) 16px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--glass);
+  backdrop-filter:blur(40px) saturate(1.8);
+  -webkit-backdrop-filter:blur(40px) saturate(1.8);
+  position:sticky;top:0;z-index:400;
+  border-bottom:0.5px solid var(--glass-border);
+}
+
+.logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;line-height:1;letter-spacing:4px;
+  color:var(--accent);
+  /* Lime glow */
+  text-shadow:0 0 20px var(--accent-glow);
+  position:relative;
+}
+.logo::after{
+  content:'LIFT';position:absolute;top:0;left:0;
+  filter:blur(8px);opacity:.3;color:var(--accent);
+  z-index:-1;
+}
+.logo span{display:none;}
+
+.header-right{display:flex;align-items:center;gap:8px;}
+.week-badge{
+  background:var(--surface2);
+  border:0.5px solid var(--glass-border);
+  border-radius:10px;padding:4px 10px;text-align:right;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.week-badge .wn{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);line-height:1;}
+.week-badge .wl{font-size:8.5px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.user-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--accent-dim);
+  border:1.5px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;
+  box-shadow:0 0 12px var(--accent-glow);
+  transition:box-shadow .2s;
+}
+.user-avatar:hover{box-shadow:0 0 20px var(--accent-glow);}
+
+/* ── CARDS — Glass morphism ── */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:0.5px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:16px;margin-bottom:10px;
+  transition:border-color .2s,transform .15s;
+  position:relative;overflow:hidden;
+}
+/* Card inner shimmer */
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  pointer-events:none;
+}
+
+/* ── SECTION LABELS ── */
+.section-label{
+  font-size:9px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--muted);margin:20px 0 8px;padding-left:2px;
+  font-weight:600;
+}
+
+/* ── INSIGHT CARD — glass with colour tint ── */
+.insight-card{
+  border-radius:var(--radius);padding:16px;margin-bottom:0;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(20px) saturate(1.5);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  border:0.5px solid transparent;
+  transition:all .3s ease;
+}
+.insight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:var(--radius) var(--radius) 0 0;}
+.insight-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);}
+.insight-fresh{
+  background:linear-gradient(135deg,rgba(34,216,143,.10) 0%,rgba(200,255,0,.06) 100%);
+  border-color:rgba(34,216,143,.25);
+}
+.insight-fresh::before{background:linear-gradient(90deg,#22d88f,#c8ff00);}
+.insight-neutral{
+  background:linear-gradient(135deg,rgba(255,190,0,.10) 0%,rgba(255,107,53,.06) 100%);
+  border-color:rgba(255,190,0,.25);
+}
+.insight-neutral::before{background:linear-gradient(90deg,#ffbe00,#ff6b35);}
+.insight-fatigued{
+  background:linear-gradient(135deg,rgba(255,77,77,.12) 0%,rgba(255,107,53,.06) 100%);
+  border-color:rgba(255,77,77,.25);
+}
+.insight-fatigued::before{background:linear-gradient(90deg,#ff4d4d,#ff6b35);}
+.insight-nodata{background:var(--card);border-color:var(--glass-border);}
+.insight-nodata::before{background:var(--border2);}
+.insight-fresh .ic-status{color:#22d88f;}
+.insight-neutral .ic-status{color:#ffbe00;}
+.insight-fatigued .ic-status{color:#ff4d4d;}
+.insight-nodata .ic-status{color:var(--muted);}
+.ic-row{display:flex;align-items:flex-start;gap:12px;}
+.ic-emoji{font-size:30px;flex-shrink:0;line-height:1;margin-top:2px;}
+.ic-body{flex:1;}
+.ic-status{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+.ic-headline{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:.8px;line-height:1.1;margin-bottom:5px;color:var(--text);}
+.ic-detail{font-size:11.5px;color:var(--muted2);line-height:1.55;}
+.ic-metrics{display:flex;gap:0;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--glass-border);}
+.ic-metric{flex:1;text-align:center;padding:0 4px;}
+.ic-metric+.ic-metric{border-left:0.5px solid var(--glass-border);}
+.ic-metric-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;}
+.ic-metric-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.ic-rec{
+  margin-top:10px;padding:11px 13px;
+  background:rgba(255,255,255,.04);
+  border-radius:var(--radius-sm);
+  border:0.5px solid var(--glass-border);
+}
+.ic-rec-label{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:600;}
+.ic-rec-text{font-size:12px;color:var(--text2);line-height:1.45;}
+.trend-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.06);border-radius:100px;
+  padding:3px 8px;font-size:9px;font-weight:600;letter-spacing:.5px;margin-top:5px;
+  border:0.5px solid var(--glass-border);
+}
+
+/* ── TODAY CARD ── */
+.dash-today-inner{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.dash-sport-big{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--accent);line-height:1;}
+.dash-date-label{font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.dash-net-big{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;}
+.dash-quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.dash-quick-stat{
+  background:var(--surface);
+  border:0.5px solid var(--glass-border);
+  border-radius:var(--radius-sm);
+  padding:9px 5px;text-align:center;cursor:pointer;
+  transition:all .2s;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.dash-quick-stat:hover{background:var(--surface2);transform:translateY(-1px);}
+.dqs-val{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;}
+.dqs-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+
+/* ── STAT BOXES ── */
+.stat-box{
+  background:var(--card);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:0.5px solid var(--glass-border);
+  border-radius:var(--radius-sm);padding:13px;cursor:pointer;transition:all .2s;
+}
+.stat-box:hover{border-color:var(--border2);transform:translateY(-1px);}
+.stat-box .stl{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:600;}
+.stat-box .stv{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;}
+.stat-box .sts{font-size:10px;color:var(--muted);margin-top:3px;}
+.stat-box.diet-stat .stv{color:var(--diet);}
+.stat-box.weight-stat .stv{color:var(--weight);}
+.stat-box.ex-stat .stv{color:var(--exlog);}
+
+/* ── WATER CARD ── */
+.water-card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+.water-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.water-title{font-size:13px;font-weight:500;}
+.water-count{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--blue);}
+.water-glasses{display:flex;gap:5px;flex-wrap:wrap;}
+.glass-btn{
+  width:34px;height:34px;border-radius:9px;
+  border:0.5px solid var(--glass-border);background:var(--surface);
+  cursor:pointer;font-size:17px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.glass-btn.filled{background:rgba(90,180,255,.15);border-color:var(--blue);box-shadow:0 0 8px rgba(90,180,255,.2);}
+
+/* ── BUTTONS ── */
+.btn{
+  background:var(--surface);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:0.5px solid var(--glass-border);
+  border-radius:var(--radius-xs);padding:10px 16px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  color:var(--text);cursor:pointer;transition:all .2s;
+}
+.btn:hover{background:var(--surface2);border-color:var(--border2);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn:active{transform:scale(.98);}
+.btn-primary{
+  background:var(--accent);border-color:var(--accent);color:#0d0d0d;
+  box-shadow:0 4px 16px var(--accent-glow);font-weight:600;
+}
+.btn-primary:hover{box-shadow:0 6px 24px var(--accent-glow);transform:translateY(-1px);}
+.btn-diet{background:var(--diet);border-color:var(--diet);color:white;box-shadow:0 4px 14px rgba(191,127,255,.25);}
+.btn-weight{background:var(--weight);border-color:var(--weight);color:white;}
+.btn-ex{background:var(--exlog);border-color:var(--exlog);color:#0d0d0d;}
+.btn-block{display:block;width:100%;text-align:center;}
+
+/* ── MEAL LOG ── */
+.meal-log-item{
+  background:var(--surface);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);
+  padding:11px 13px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+}
+.mli-left{flex:1;}.mli-name{font-size:13px;font-weight:500;margin-bottom:2px;line-height:1.3;}.mli-meta{font-size:10px;color:var(--muted);}
+.mli-right{text-align:right;flex-shrink:0;}.mli-cals{font-family:'Bebas Neue',sans-serif;font-size:21px;color:var(--diet);line-height:1;}.mli-unit{font-size:9px;color:var(--muted);}
+
+/* ── FOOD INPUT ── */
+.food-input-card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:10px;}
+.fi-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--diet);margin-bottom:2px;}
+.fi-sub{font-size:11px;color:var(--muted);margin-bottom:12px;font-style:italic;}
+
+/* ── SETTINGS ── */
+.settings-section{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-top:0.5px solid var(--glass-border);gap:12px;}
+.settings-row:first-of-type{border-top:none;}
+.sr-label{font-size:14px;font-weight:500;margin-bottom:2px;}
+.sr-sub{font-size:11px;color:var(--muted);}
+
+/* ── DATE NAV ── */
+.date-nav{
+  display:flex;align-items:center;gap:5px;margin-bottom:12px;
+  background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:7px 9px;
+}
+.dn-arrow{
+  background:var(--surface);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:0.5px solid var(--glass-border);border-radius:8px;
+  padding:5px 11px;font-size:15px;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.dn-arrow:hover{border-color:var(--border2);color:var(--text);}
+.dn-arrow:disabled{opacity:.3;cursor:default;}
+.dn-label{flex:1;text-align:center;font-size:12px;font-weight:500;color:var(--text);}
+.dn-windows{display:flex;gap:3px;flex-shrink:0;}
+.dnw-btn{
+  background:var(--surface);border:0.5px solid var(--glass-border);
+  border-radius:7px;padding:4px 8px;font-size:9.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.dnw-btn.active{background:var(--accent);border-color:var(--accent);color:#0d0d0d;font-weight:600;}
+
+/* ── SPORT/DIET TABS ── */
+.sport-tabs,.tabs{display:flex;gap:5px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.sport-tabs::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none;}
+.sport-tab{
+  flex-shrink:0;
+  background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:0.5px solid var(--glass-border);border-radius:100px;
+  padding:7px 15px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.sport-tab.active{background:var(--accent);border-color:var(--accent);color:#0d0d0d;font-weight:600;}
+.tabs{background:var(--surface);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:4px;}
+.tab{flex:1;background:none;border:none;border-radius:9px;padding:7px 4px;font-size:10px;font-weight:500;color:var(--muted);cursor:pointer;text-align:center;transition:all .15s;}
+.tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12);}
+
+/* ── CALORIE GOAL BAR ── */
+.calorie-goal-bar{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+.cg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cg-title{font-size:12px;font-weight:500;}
+.cg-input{background:var(--input-bg);border:0.5px solid var(--glass-border);border-radius:7px;padding:3px 8px;font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--diet);width:68px;text-align:center;}
+.goalbar{height:5px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.goalbar-fill{height:100%;background:var(--diet);border-radius:4px;transition:width .4s ease;max-width:100%;box-shadow:0 0 8px rgba(191,127,255,.3);}
+.goalbar-fill.over{background:var(--accent2);}
+.goalbar-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--muted);}
+
+/* ── EXERCISE CARDS ── */
+.ex-card{
+  background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);
+  padding:12px;margin-bottom:7px;transition:all .2s;position:relative;overflow:hidden;
+}
+.ex-card.done{opacity:.3;border-color:transparent;}
+.ex-card:hover:not(.done){border-color:var(--border2);transform:translateY(-1px);}
+.ex-card-top{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.ex-chk{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:11px;}
+.ex-card.done .ex-chk{background:var(--accent);border-color:var(--accent);color:#0d0d0d;box-shadow:0 0 8px var(--accent-glow);}
+.ex-info{flex:1;}.ex-name{font-size:13px;font-weight:500;margin-bottom:2px;}.ex-detail{font-size:11px;color:var(--muted);}.ex-rest{font-size:10px;color:var(--muted);text-align:right;flex-shrink:0;}
+.ex-log-list-item,.activity-item{background:var(--surface);border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+
+/* ── STREAKS ── */
+.streaks-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;}
+.streak-box{
+  background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);
+  padding:12px;text-align:center;transition:all .2s;
+}
+.streak-box.active{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 16px var(--accent-glow);}
+.streak-icon{font-size:20px;margin-bottom:4px;}
+.streak-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--accent);}
+.streak-val.zero{color:var(--muted);}
+.streak-lbl{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.vol-box{background:var(--card);border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:12px 7px;text-align:center;cursor:pointer;transition:all .2s;}
+.vol-box:hover{border-color:var(--border2);transform:translateY(-1px);}
+.vol-box .vb-icon{font-size:19px;margin-bottom:3px;}
+.vol-box .vb-val{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;}
+.vol-box .vb-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.achievement-card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:0.5px solid var(--glass-border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:12px;transition:all .2s;margin-bottom:7px;}
+.achievement-card.earned{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 12px var(--accent-glow);}
+.achievement-card.locked{opacity:.4;}
+.chart-card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:10px;}
+
+/* ── FAV CHIPS ── */
+.fav-section{margin-bottom:12px;}
+.fav-grid{display:flex;gap:6px;flex-wrap:wrap;}
+.fav-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:0.5px solid var(--glass-border);border-radius:100px;
+  padding:6px 12px 6px 10px;cursor:pointer;transition:all .2s;font-size:12px;
+}
+.fav-chip:hover{border-color:var(--diet);box-shadow:0 0 10px rgba(191,127,255,.2);transform:translateY(-1px);}
+.fc-cals{font-size:10px;color:var(--diet);font-weight:600;}
+.fc-del{font-size:12px;color:var(--muted);margin-left:2px;}
+.fav-btn{
+  background:rgba(191,127,255,.1);border:0.5px solid rgba(191,127,255,.3);
+  color:var(--diet);border-radius:8px;padding:8px 14px;
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.fav-btn:hover{background:rgba(191,127,255,.2);box-shadow:0 0 12px rgba(191,127,255,.2);}
+
+/* ── INPUTS ── */
+input,select,textarea{
+  background:var(--input-bg);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:0.5px solid var(--glass-border);border-radius:var(--radius-xs);
+  padding:10px 12px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:13px;
+  transition:border-color .2s,box-shadow .2s;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-dim);
+}
+
+/* ── TOASTS ── */
+.water-toast,.achievement-toast{
+  backdrop-filter:blur(20px) saturate(1.5);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  border:0.5px solid var(--glass-border);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ══════════════════════════════
+   DESKTOP — Sidebar layout
+══════════════════════════════ */
+@media(min-width:768px){
+  body{padding-bottom:0;padding-left:220px;}
+  .nav{
+    position:fixed;top:0;left:0;bottom:0;
+    width:220px;height:100vh;
+    flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    padding:0 10px 20px;
+    border-top:none;border-right:0.5px solid var(--glass-border);border-bottom:none;
+    gap:2px;overflow-y:auto;
+    /* Remove bottom tab styles */
+    box-shadow:none;
+  }
+  .nav::before{display:none;}
+  .nb{
+    flex:none;flex-direction:row;width:100%;max-width:100%;
+    padding:10px 12px;border-radius:var(--radius-sm);
+    justify-content:flex-start;font-size:13px;gap:10px;
+  }
+  .nb .tab-icon{font-size:18px;margin-bottom:0;}
+  .nb.active{background:var(--accent-dim);}
+  .nb.active::after{display:none;}
+  .nb:hover:not(.active){background:var(--surface);}
+  .nav-logo{
+    display:block !important;
+    font-family:'Bebas Neue',sans-serif;font-size:30px;
+    color:var(--accent);letter-spacing:4px;
+    padding:20px 12px 16px;width:100%;
+    text-shadow:0 0 20px var(--accent-glow);
+  }
+  header{padding:12px 22px;left:220px;}
+  main{padding:14px 22px;}
+}
 
 /* AUTH */
 #authScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;transition:background .3s;}
@@ -476,7 +1015,7 @@ body{transition:background .3s,color .3s;}
 .sr-label{font-size:13px;font-weight:500;margin-bottom:2px;}
 .sr-sub{font-size:11px;color:var(--muted);}
 .theme-btns{display:flex;gap:5px;flex-shrink:0;}
-.theme-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;}
+.theme-btn{background:var(--surface);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid var(--glass-border);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;}
 .theme-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,.08);}
 .settings-num{width:85px;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-align:center;flex-shrink:0;}
 
@@ -606,14 +1145,14 @@ body{transition:background .3s,color .3s;}
 
 <!-- HEADER -->
 <header>
-  <div class="logo">LIFT<span>Athlete OS</span></div>
+  <div class="logo">LIFT</div>
   <div class="header-right">
-    <div class="week-badge"><div class="wn" id="todayDate" style="font-size:16px;letter-spacing:0;"></div><div class="wl" id="todayDay"></div></div>
+    <div class="week-badge"><div class="wn" id="todayDate"></div><div class="wl" id="todayDay"></div></div>
     <div class="user-menu">
       <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">?</div>
       <div class="user-dropdown" id="userDropdown">
         <div class="ud-email" id="udEmail">\u2014</div>
-        <div class="ud-item" onclick="exportData()">\ud83d\udce5 Export Data (CSV)</div>
+        <div class="ud-item" onclick="exportData()">\ud83d\udce5 Export Data</div>
         <div class="ud-item danger" onclick="doSignOut()">\ud83d\udeaa Sign Out</div>
       </div>
     </div>
@@ -623,12 +1162,13 @@ body{transition:background .3s,color .3s;}
 <div class="sync-bar"><div class="sync-dot" id="syncDot"></div><span id="syncStatus">Connecting...</span></div>
 
 <nav class="nav">
-  <button class="nb active" onclick="showView('dashboard')">Dashboard</button>
-  <button class="nb" onclick="showView('train')">Train</button>
-  <button class="nb" onclick="showView('fuel')">Fuel</button>
-  <button class="nb" onclick="showView('body')">Body</button>
-  <button class="nb" onclick="showView('progress')">Progress</button>
-  <button class="nb" onclick="showView('settings')">\u2699\ufe0f</button>
+  <div class="nav-logo">LIFT</div>
+  <button class="nb active" onclick="showView('dashboard')"><span class="tab-icon">&#127968;</span>Home</button>
+  <button class="nb" onclick="showView('train')"><span class="tab-icon">&#9889;</span>Train</button>
+  <button class="nb" onclick="showView('fuel')"><span class="tab-icon">&#127859;</span>Fuel</button>
+  <button class="nb" onclick="showView('body')"><span class="tab-icon">&#9878;&#65039;</span>Body</button>
+  <button class="nb" onclick="showView('progress')"><span class="tab-icon">&#128200;</span>Progress</button>
+  <button class="nb" onclick="showView('settings')"><span class="tab-icon">&#9881;&#65039;</span>Settings</button>
 </nav>
 
 <main>
@@ -637,39 +1177,46 @@ body{transition:background .3s,color .3s;}
 <div class="view active" id="view-dashboard">
 
   <!-- Today's brief -->
-  <div class="dash-today card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+  <div class="card">
+    <div class="dash-today-inner">
       <div>
-        <div class="section-label" style="margin:0 0 2px;">Today's Brief</div>
-        <div id="dashSportTag" style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--accent);line-height:1;">Rest Day</div>
-        <div id="dashReadiness" style="font-size:11px;color:var(--muted2);margin-top:2px;">Recovery & fuelling day</div>
+        <div style="font-size:8.5px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Today</div>
+        <div id="dashSportTag" class="dash-sport-big">Rest Day</div>
+        <div id="dashReadiness" style="font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.4;">Recovery &amp; fuelling day</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">Net Cals</div>
-        <div id="dashNetCals" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text);line-height:1;">\u2014</div>
+        <div class="dash-date-label">Net Cals</div>
+        <div id="dashNetCals" class="dash-net-big" style="color:var(--text);">\u2014</div>
         <div style="font-size:9px;color:var(--muted);">eaten \u2212 burned</div>
       </div>
     </div>
-    <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;" id="dashQuickStats"></div>
+    <div class="dash-quick-grid" id="dashQuickStats"></div>
   </div>
 
-  <!-- Training load -->
-  <div class="section-label">Training Load \u2014 Last 6 Weeks</div>
-  <div class="card" style="padding:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="display:flex;gap:14px;">
-        <div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Fitness</div><div id="dashCTL" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--pull);">\u2014</div></div>
-        <div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Fatigue</div><div id="dashATL" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--danger);">\u2014</div></div>
-        <div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Form</div><div id="dashTSB" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);">\u2014</div></div>
+  <!-- Training Insights -->
+  <div class="section-label">Training Status</div>
+  <div id="trainingInsightCard" class="insight-card insight-nodata">
+    <div class="ic-row">
+      <div class="ic-emoji" id="insightEmoji">\ud83d\udcca</div>
+      <div class="ic-body">
+        <div class="ic-status" id="insightStatus">NO DATA YET</div>
+        <div class="ic-headline" id="insightHeadline">Start logging sessions</div>
+        <div class="ic-detail" id="insightDetail">Log your first training session to see personalised load guidance here.</div>
+        <div id="insightTrend" style="display:none;" class="trend-pill"></div>
       </div>
-      <div style="text-align:right;font-size:10px;color:var(--muted);line-height:1.5;">CTL \u00b7 ATL \u00b7 TSB<br><span id="dashFormLabel" style="color:var(--muted2);">Log sessions to build</span></div>
     </div>
-    <svg id="loadChart" style="width:100%;height:80px;display:block;"></svg>
-    <div style="display:flex;justify-content:space-between;margin-top:4px;">
-      <span style="font-size:9px;color:var(--muted);">6 weeks ago</span>
-      <span style="font-size:9px;color:var(--muted);">Today</span>
+    <div class="ic-metrics">
+      <div class="ic-metric"><div class="ic-metric-val" id="dashCTL" style="color:var(--pull);">\u2014</div><div class="ic-metric-lbl">Fitness CTL</div></div>
+      <div class="ic-metric"><div class="ic-metric-val" id="dashATL" style="color:var(--danger);">\u2014</div><div class="ic-metric-lbl">Fatigue ATL</div></div>
+      <div class="ic-metric"><div class="ic-metric-val" id="dashTSB" style="color:var(--accent);">\u2014</div><div class="ic-metric-lbl">Form TSB</div></div>
     </div>
+    <div class="ic-rec" id="insightRec" style="display:none;">
+      <div class="ic-rec-label">\u26a1 Recommended next session</div>
+      <div class="ic-rec-text" id="insightRecText">\u2014</div>
+    </div>
+    <span id="dashFormLabel" style="display:none;"></span>
   </div>
+  <svg id="loadChart" style="width:100%;height:60px;display:block;margin:6px 0 14px;opacity:.7;"></svg>
 
   <!-- Weekly volume by sport -->
   <div class="section-label">This Week</div>
@@ -1227,6 +1774,7 @@ body{transition:background .3s,color .3s;}
       <div class="theme-btns">
         <div class="theme-btn active" id="themeDark" onclick="setTheme('dark')">Dark</div>
         <div class="theme-btn" id="themeLight" onclick="setTheme('light')">Light</div>
+        <div class="theme-btn" id="themeAuto" onclick="setTheme('auto')">Auto</div>
       </div>
     </div>
   </div>
@@ -1261,7 +1809,7 @@ body{transition:background .3s,color .3s;}
       <button class="btn" style="flex-shrink:0;color:var(--danger);border-color:var(--danger);" onclick="doSignOut()">Sign Out</button>
     </div>
   </div>
-  <div style="text-align:center;padding:20px;font-size:10px;color:var(--muted);">LIFT v3.1 \u00b7 Built with \u2764\ufe0f</div>
+  <div style="text-align:center;padding:20px;font-size:10px;color:var(--muted);">LIFT v3.2 \u00b7 Built with \u2764\ufe0f</div>
 </div>
 
 </main>
@@ -1652,45 +2200,137 @@ function calcTSS(entry){
 }
 
 function updateTrainingLoad(){
-  // Build 42-day TSS history
-  const allLogs=[...state.exerciseLog];
+  // Merge all exercise history
+  const allLogs=[...state.exerciseLog,...(state.allExerciseLog||[])];
   const tssMap={};
   allLogs.forEach(e=>{if(e.date)tssMap[e.date]=(tssMap[e.date]||0)+calcTSS(e);});
 
-  // CTL = 42-day EWA, ATL = 7-day EWA
+  // CTL = 42-day EWA, ATL = 7-day EWA — with 42-day preload for accuracy
+  const today=new Date();
+  const totalDays=84; // 42 preload + 42 display
   const days=[];
-  const d=new Date();
-  for(let i=41;i>=0;i--){const dd=new Date(d);dd.setDate(dd.getDate()-i);days.push(dd.toISOString().slice(0,10));}
+  for(let i=totalDays-1;i>=0;i--){
+    const dd=new Date(today);dd.setDate(dd.getDate()-i);
+    days.push(dd.toISOString().slice(0,10));
+  }
 
   let ctl=0,atl=0;
   const ctlPoints=[],atlPoints=[];
-  days.forEach(day=>{
+  days.forEach((day,idx)=>{
     const tss=tssMap[day]||0;
     ctl=ctl+(tss-ctl)*(1/42);
     atl=atl+(tss-atl)*(1/7);
-    ctlPoints.push(Math.round(ctl));
-    atlPoints.push(Math.round(atl));
+    if(idx>=42){ctlPoints.push(Math.round(ctl));atlPoints.push(Math.round(atl));}
   });
   const tsb=Math.round(ctl-atl);
 
-  // Update dashboard numbers
+  // Update metric displays
   ['CTL','ATL','TSB'].forEach((id,i)=>{
-    const el=document.getElementById('dash'+id);
-    if(el)el.textContent=[Math.round(ctl),Math.round(atl),tsb][i];
-    const el2=document.getElementById('prog'+id);
-    if(el2)el2.textContent=[Math.round(ctl),Math.round(atl),tsb][i];
+    const val=[Math.round(ctl),Math.round(atl),tsb][i];
+    ['dash','prog'].forEach(pfx=>{
+      const el=document.getElementById(pfx+id);
+      if(el)el.textContent=val;
+    });
   });
-  const formLabel=document.getElementById('dashFormLabel');
-  if(formLabel){
-    if(ctl<5)formLabel.textContent='Log sessions to build';
-    else if(tsb>10)formLabel.textContent='Fresh \u2014 race ready \ud83d\udfe2';
-    else if(tsb>0)formLabel.textContent='Neutral \u2014 stable load \ud83d\udfe1';
-    else formLabel.textContent='Fatigued \u2014 consider recovery \ud83d\udd34';
-  }
 
-  // Draw mini sparkline on dashboard
+  // ── INSIGHTS ENGINE ──
+  renderTrainingInsight(Math.round(ctl),Math.round(atl),tsb,ctlPoints);
+
+  // Draw sparkline
   drawLoadChart('loadChart',ctlPoints,atlPoints);
   drawLoadChart('progressLoadChart',ctlPoints,atlPoints);
+}
+
+function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
+  const card=document.getElementById('trainingInsightCard');
+  const emoji=document.getElementById('insightEmoji');
+  const status=document.getElementById('insightStatus');
+  const headline=document.getElementById('insightHeadline');
+  const detail=document.getElementById('insightDetail');
+  const trendEl=document.getElementById('insightTrend');
+  const recBox=document.getElementById('insightRec');
+  const recText=document.getElementById('insightRecText');
+  if(!card)return;
+
+  // No data state
+  if(ctl<1){
+    card.className='insight-card insight-nodata';
+    if(emoji)emoji.textContent='\ud83d\udcca';
+    if(status)status.textContent='NO DATA YET';
+    if(headline)headline.textContent='Start logging sessions';
+    if(detail)detail.textContent='Log your first training session to see personalised load guidance here.';
+    if(trendEl)trendEl.style.display='none';
+    if(recBox)recBox.style.display='none';
+    return;
+  }
+
+  // Trend: compare last 7-day avg CTL vs prior 7-day
+  let trendText='',trendDir='';
+  if(ctlPoints.length>=14){
+    const recent=ctlPoints.slice(-7).reduce((a,b)=>a+b,0)/7;
+    const prior=ctlPoints.slice(-14,-7).reduce((a,b)=>a+b,0)/7;
+    const delta=recent-prior;
+    if(delta>1.5){trendDir='\u2197';trendText='Fitness rising +'+Math.round(delta);}
+    else if(delta<-1.5){trendDir='\u2198';trendText='Fitness declining '+Math.round(delta);}
+    else{trendDir='\u2192';trendText='Fitness stable';}
+  }
+
+  // Determine state
+  let state_name,rec;
+  if(tsb>15){
+    state_name='fresh';
+    card.className='insight-card insight-fresh';
+    if(emoji)emoji.textContent='\ud83d\udfe2';
+    if(status)status.textContent='RACE READY';
+    if(headline)headline.textContent='You are peaking right now';
+    if(detail)detail.textContent='Your form (TSB '+tsb+') is excellent. Fitness base of CTL '+ctl+' with low fatigue. This is the ideal window to race or test yourself.';
+    rec='A hard effort or race. Time trial, threshold intervals, or a key long session. Avoid heavy volume — protect your freshness.';
+  } else if(tsb>5){
+    state_name='fresh';
+    card.className='insight-card insight-fresh';
+    if(emoji)emoji.textContent='\u26a1';
+    if(status)status.textContent='WELL RESTED';
+    if(headline)headline.textContent='Good form — ready to train hard';
+    if(detail)detail.textContent='Form (TSB '+tsb+') is positive and fitness (CTL '+ctl+') is solid. You have enough freshness for quality training without digging a big hole.';
+    rec='Threshold or VO2max work. 4-6 x 4-min at hard effort, or a long tempo run/ride. Build on this fitness.';
+  } else if(tsb>=-5){
+    state_name='neutral';
+    card.className='insight-card insight-neutral';
+    if(emoji)emoji.textContent='\ud83d\udfe1';
+    if(status)status.textContent='TRAINING LOAD: BALANCED';
+    if(headline)headline.textContent='Steady state — keep building';
+    if(detail)detail.textContent='Your fatigue and fitness are balanced (TSB '+tsb+'). CTL is '+ctl+'. This is a sustainable training zone — keep the consistency going.';
+    rec='Moderate aerobic session. Zone 2 endurance work, a comfortable long run, or a skills/technique session.';
+  } else if(tsb>=-15){
+    state_name='fatigued';
+    card.className='insight-card insight-fatigued';
+    if(emoji)emoji.textContent='\ud83d\udd34';
+    if(status)status.textContent='CARRYING FATIGUE';
+    if(headline)headline.textContent='Your body is under load — manage carefully';
+    if(detail)detail.textContent='Fatigue (ATL '+atl+') is exceeding fitness (CTL '+ctl+'). TSB '+tsb+' indicates accumulated stress. This is normal in a build phase but needs monitoring.';
+    rec='Easy recovery session only. Short Z1/Z2 spin, easy jog, yoga, or swim. Sleep and nutrition are critical today.';
+  } else {
+    state_name='fatigued';
+    card.className='insight-card insight-fatigued';
+    if(emoji)emoji.textContent='\ud83d\udee1\ufe0f';
+    if(status)status.textContent='HIGH FATIGUE — REST NEEDED';
+    if(headline)headline.textContent='Significant overload — prioritise recovery';
+    if(detail)detail.textContent='You are significantly fatigued (TSB '+tsb+'). Continuing hard training risks injury and burnout. Your body needs to absorb the work done.';
+    rec='Full rest day or very gentle movement only — walk, stretch, foam roll. Two or more easy days recommended before any intensity.';
+  }
+
+  // Show trend pill
+  if(trendEl && trendText){
+    trendEl.style.display='inline-flex';
+    trendEl.textContent=trendDir+' '+trendText;
+    trendEl.style.color=trendDir==='\u2197'?'var(--pull)':trendDir==='\u2198'?'var(--danger)':'var(--muted)';
+  }
+
+  // Show recommendation
+  if(recBox && recText && rec){
+    recBox.style.display='block';
+    recText.textContent=rec;
+  }
 }
 
 function drawLoadChart(svgId,ctl,atl){
@@ -2049,35 +2689,55 @@ function showAchievementToast(name){
 // THEME
 var THEMES={
   dark:{
-    '--bg':'#0e0e0e','--surface':'#141414','--card':'#1a1a1a','--border':'#272727',
-    '--border2':'#3a3a3a','--text':'#efefef','--muted':'#5a5a5a','--muted2':'#888',
-    '--input-bg':'#141414','--accent':'#e8ff47','--accent2':'#ff6b35','--push':'#3b82f6',
-    '--pull':'#10b981','--full':'#f59e0b','--diet':'#c084fc','--weight':'#fb7185',
-    '--exlog':'#34d399','--blue':'#60a5fa','--danger':'#ef4444'
+    '--bg':'#090909','--bg2':'#0f0f0f',
+    '--surface':'rgba(255,255,255,0.04)','--surface2':'rgba(255,255,255,0.07)',
+    '--card':'rgba(255,255,255,0.06)','--card2':'rgba(255,255,255,0.09)',
+    '--glass':'rgba(15,15,15,0.72)','--glass-border':'rgba(255,255,255,0.10)',
+    '--border':'rgba(255,255,255,0.09)','--border2':'rgba(255,255,255,0.16)',
+    '--text':'#f2f2f2','--text2':'#c8c8c8',
+    '--muted':'rgba(255,255,255,0.35)','--muted2':'rgba(255,255,255,0.55)',
+    '--input-bg':'rgba(255,255,255,0.05)',
+    '--accent':'#c8ff00','--accent-dim':'rgba(200,255,0,0.12)','--accent-glow':'rgba(200,255,0,0.25)',
+    '--accent2':'#ff6b35','--push':'#4f8cff','--pull':'#22d88f','--full':'#ffbe00',
+    '--diet':'#bf7fff','--weight':'#ff6b8a','--exlog':'#3de8a0','--blue':'#5ab4ff','--danger':'#ff4d4d',
+    '--tab-bg':'rgba(12,12,12,0.88)'
   },
   light:{
-    '--bg':'#f0f0ec','--surface':'#e4e4e0','--card':'#ffffff','--border':'#d4d4d0',
-    '--border2':'#b8b8b4','--text':'#111111','--muted':'#888888','--muted2':'#555555',
-    '--input-bg':'#f8f8f6','--accent':'#5a8a00','--accent2':'#d4460a','--push':'#2563eb',
-    '--pull':'#059669','--full':'#d97706','--diet':'#9333ea','--weight':'#e11d48',
-    '--exlog':'#059669','--blue':'#2563eb','--danger':'#dc2626'
+    '--bg':'#f5f5f7','--bg2':'#ebebed',
+    '--surface':'rgba(255,255,255,0.70)','--surface2':'rgba(255,255,255,0.88)',
+    '--card':'rgba(255,255,255,0.80)','--card2':'rgba(255,255,255,0.95)',
+    '--glass':'rgba(245,245,247,0.80)','--glass-border':'rgba(0,0,0,0.08)',
+    '--border':'rgba(0,0,0,0.08)','--border2':'rgba(0,0,0,0.15)',
+    '--text':'#0d0d0d','--text2':'#2a2a2a',
+    '--muted':'rgba(0,0,0,0.38)','--muted2':'rgba(0,0,0,0.58)',
+    '--input-bg':'rgba(0,0,0,0.04)',
+    '--accent':'#6ab000','--accent-dim':'rgba(106,176,0,0.10)','--accent-glow':'rgba(106,176,0,0.20)',
+    '--accent2':'#e0501a','--push':'#2563eb','--pull':'#059669','--full':'#d97706',
+    '--diet':'#9333ea','--weight':'#e11d48','--exlog':'#059669','--blue':'#2563eb','--danger':'#dc2626',
+    '--tab-bg':'rgba(245,245,247,0.90)'
   }
 };
 function setTheme(t){
-  var vars=THEMES[t]||THEMES.dark;
-  // Apply to both <html> and <body> to cover all inheritance paths
+  // 'auto' resolves to system preference
+  var resolved = t;
+  if(t === 'auto'){
+    resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  var vars = THEMES[resolved] || THEMES.dark;
   [document.documentElement, document.body].forEach(function(el){
     Object.keys(vars).forEach(function(k){ el.style.setProperty(k, vars[k]); });
   });
-  // Also force body background and text color directly - belt and braces
   document.body.style.backgroundColor = vars['--bg'];
   document.body.style.color = vars['--text'];
-  // Persist
+  // Update theme-color meta for browser chrome
+  var tm = document.querySelector('meta[name="theme-color"]');
+  if(tm) tm.content = vars['--bg'];
   try { localStorage.setItem('lift_theme', t); } catch(e) {}
   // Update buttons
-  var dark = t === 'dark';
-  document.getElementById('themeDark').classList.toggle('active', dark);
-  document.getElementById('themeLight').classList.toggle('active', !dark);
+  var d=document.getElementById('themeDark'), l=document.getElementById('themeLight'), a=document.getElementById('themeAuto');
+  if(d) d.classList.toggle('active', t==='dark');
+  if(l) l.classList.toggle('active', t==='light');
+  if(a) a.classList.toggle('active', t==='auto');
 }
 // SETTINGS SYNC
 function syncCalGoalFromSettings(){
