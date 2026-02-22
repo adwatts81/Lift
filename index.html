@@ -511,8 +511,8 @@ header{
 /* ── INPUTS ── */
 input,select,textarea{
   background:var(--input-bg);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border:0.5px solid var(--glass-border);border-radius:var(--radius-xs);
+  border:0.5px solid var(--glass-border);
+  border-radius:var(--radius-xs);
   padding:10px 12px;color:var(--text);
   font-family:'DM Sans',sans-serif;font-size:13px;
   transition:border-color .2s,box-shadow .2s;
@@ -572,24 +572,119 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* AUTH */
-#authScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;transition:background .3s;}
+#authScreen{
+  position:fixed;inset:0;
+  background:var(--bg);
+  z-index:1000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;overflow-y:auto;
+  transition:background .3s;
+  /* Mesh gradient backdrop */
+  background-image:
+    radial-gradient(ellipse 70% 50% at 30% 0%,rgba(200,255,0,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 70% 100%,rgba(79,140,255,.06) 0%,transparent 60%);
+}
 header,nav,.sync-bar,main{visibility:hidden;}
 body.authed header,body.authed nav,body.authed .sync-bar,body.authed main{visibility:visible;}
 #authScreen.hidden{display:none;}
-.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--accent);letter-spacing:4px;line-height:1;margin-bottom:8px;}
-.auth-sub{font-size:11px;letter-spacing:4px;color:var(--muted2);text-transform:uppercase;margin-bottom:48px;}
-.auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;}
-.auth-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin-bottom:20px;color:var(--accent);}
+
+.auth-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:80px;
+  color:var(--accent);letter-spacing:5px;line-height:1;margin-bottom:6px;
+  text-shadow:0 0 30px var(--accent-glow);
+}
+.auth-sub{font-size:10px;letter-spacing:5px;color:var(--muted);text-transform:uppercase;margin-bottom:44px;font-weight:500;}
+
+/* Auth card — solid glass, clearly readable */
+.auth-card{
+  /* Solid enough backgrounds that work with glass vars */
+  background:var(--auth-card-bg, rgba(28,28,30,0.95));
+  border:0.5px solid var(--glass-border);
+  border-radius:22px;
+  padding:28px 24px;
+  width:100%;max-width:380px;
+  backdrop-filter:blur(40px) saturate(1.5);
+  -webkit-backdrop-filter:blur(40px) saturate(1.5);
+  box-shadow:0 24px 64px rgba(0,0,0,.5), 0 0 0 0.5px var(--glass-border);
+}
+
+.auth-title{
+  font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1.5px;
+  margin-bottom:22px;color:var(--accent);
+}
 .auth-field{margin-bottom:14px;}
-.auth-field label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:5px;}
-.auth-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .15s;}
-.auth-field input:focus{border-color:var(--accent);}
-.auth-btn{width:100%;background:var(--accent);border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:#0e0e0e;cursor:pointer;margin-top:4px;transition:opacity .15s;}
-.auth-btn:hover{opacity:.85;}.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
-.auth-switch{text-align:center;margin-top:16px;font-size:12px;color:var(--muted2);}
-.auth-switch span{color:var(--accent);cursor:pointer;font-weight:500;}
-.auth-error{background:#2d1010;border:1px solid #5a1a1a;border-radius:8px;padding:10px 12px;font-size:12px;color:#f87171;margin-bottom:12px;display:none;}
+.auth-field label{
+  font-size:10px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--muted2);display:block;margin-bottom:6px;font-weight:600;
+}
+
+/* Auth inputs — explicit solid bg, no glass tricks */
+.auth-field input{
+  width:100%;
+  background:rgba(255,255,255,0.07) !important;
+  border:0.5px solid rgba(255,255,255,0.14) !important;
+  border-radius:12px !important;
+  padding:14px 15px !important;
+  font-family:'DM Sans',sans-serif !important;
+  font-size:15px !important;
+  color:var(--text) !important;
+  outline:none !important;
+  transition:border-color .2s,box-shadow .2s !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  -webkit-appearance:none;
+  box-sizing:border-box;
+}
+.auth-field input:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px var(--accent-dim) !important;
+  background:rgba(255,255,255,0.10) !important;
+}
+.auth-field input::placeholder{color:rgba(255,255,255,0.28) !important;}
+
+.auth-btn{
+  width:100%;background:var(--accent);border:none;border-radius:12px;
+  padding:15px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  color:#0d0d0d;cursor:pointer;margin-top:6px;
+  transition:all .2s;
+  box-shadow:0 4px 20px var(--accent-glow);
+}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 6px 28px var(--accent-glow);}
+.auth-btn:active{transform:scale(.98);}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.auth-switch{text-align:center;margin-top:18px;font-size:12px;color:var(--muted);}
+.auth-switch span{color:var(--accent);cursor:pointer;font-weight:600;}
+
+/* Auth error — use semantic colors, not hardcoded dark values */
+.auth-error{
+  background:rgba(239,68,68,0.12);
+  border:0.5px solid rgba(239,68,68,0.35);
+  border-radius:10px;padding:11px 13px;
+  font-size:12px;color:#ff6b6b;
+  margin-bottom:14px;display:none;
+  line-height:1.5;
+}
 .auth-error.show{display:block;}
+
+/* Light mode auth card */
+@media (prefers-color-scheme: light) {
+  .auth-card{background:rgba(255,255,255,0.92) !important;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+  .auth-field input{background:rgba(0,0,0,0.04) !important;border-color:rgba(0,0,0,0.12) !important;color:#0d0d0d !important;}
+  .auth-field input::placeholder{color:rgba(0,0,0,0.3) !important;}
+}
+/* JS-set light theme auth card override */
+html[style*="--bg:#f5f5f7"] .auth-card,
+html[style*="--bg: #f5f5f7"] .auth-card{
+  background:rgba(255,255,255,0.92) !important;
+  box-shadow:0 20px 60px rgba(0,0,0,.12);
+}
+html[style*="--bg:#f5f5f7"] .auth-field input,
+html[style*="--bg: #f5f5f7"] .auth-field input{
+  background:rgba(0,0,0,0.05) !important;
+  border-color:rgba(0,0,0,0.12) !important;
+  color:#0d0d0d !important;
+}
 .auth-spinner{display:none;align-items:center;justify-content:center;gap:8px;padding:10px;font-size:12px;color:var(--muted2);}
 .auth-spinner.show{display:flex;}
 
@@ -811,7 +906,7 @@ svg.wt-chart{width:100%;height:155px;overflow:visible;}
 .wl-item:last-child{border-bottom:none;}
 .wl-date{font-size:11px;color:var(--muted);}.wl-val{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--weight);}
 .wl-delta{font-size:10px;padding:2px 7px;border-radius:100px;}
-.wl-delta.up{background:#2d1010;color:#f87171;}.wl-delta.down{background:#0d2d10;color:#4ade80;}
+.wl-delta.up{background:rgba(239,68,68,.15);color:#ff6b6b;}.wl-delta.down{background:rgba(34,216,143,.12);color:#22d88f;}
 .apple-health-banner{background:linear-gradient(135deg,#1a0a1a,#1a0a10);border:1px solid #4a1a4a;border-radius:12px;padding:13px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
 .ah-icon{font-size:20px;flex-shrink:0;}
 .ah-text .ht{font-size:11px;font-weight:500;color:#e879f9;margin-bottom:2px;}
@@ -1090,7 +1185,7 @@ body{transition:background .3s,color .3s;}
 </head>
 <body>
 <!-- Splash cover shown until auth resolves -->
-<div id="splashCover" style="position:fixed;inset:0;background:var(--bg,#0e0e0e);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:background .3s;"><div style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:#e8ff47;letter-spacing:4px;">LIFT</div><div id="splashStatus" style="font-size:10px;letter-spacing:4px;color:#5a5a5a;text-transform:uppercase;">Loading...</div><div id="splashDebug" style="font-size:11px;color:#444;margin-top:12px;text-align:center;padding:0 24px;line-height:1.6;"></div><button onclick="document.getElementById('splashCover').style.display='none';document.getElementById('authScreen').classList.remove('hidden');" style="margin-top:20px;background:none;border:1px solid #333;border-radius:8px;padding:8px 20px;color:#555;font-size:11px;cursor:pointer;">Tap if stuck</button></div>
+<div id="splashCover" style="position:fixed;inset:0;background:var(--bg,#090909);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;transition:background .3s;background-image:radial-gradient(ellipse 70% 50% at 30% 0%,rgba(200,255,0,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 70% 100%,rgba(79,140,255,.05) 0%,transparent 60%);"><div style="font-family:'Bebas Neue',sans-serif;font-size:72px;color:#c8ff00;letter-spacing:5px;line-height:1;text-shadow:0 0 40px rgba(200,255,0,0.3);">LIFT</div><div id="splashStatus" style="font-size:9px;letter-spacing:5px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-top:4px;">Loading...</div><div id="splashDebug" style="display:none;"></div><button onclick="document.getElementById('splashCover').style.display='none';document.getElementById('authScreen').classList.remove('hidden');" style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:none;border:none;padding:12px 24px;color:rgba(255,255,255,.15);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Having trouble? Tap here</button></div>
 
 <!-- AUTH SCREEN -->
 <div id="authScreen">
@@ -1100,7 +1195,7 @@ body{transition:background .3s,color .3s;}
     <div class="auth-title">Sign In</div>
     <div class="auth-error" id="loginError"></div>
     <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="auth-field"><label>Password</label><div style="position:relative;"><input type="password" id="loginPassword" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" autocomplete="current-password" style="padding-right:44px;"><button type="button" onclick="togglePw('loginPassword',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">\ud83d\udc41</button></div></div>
+    <div class="auth-field"><label>Password</label><div style="position:relative;"><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;"><button type="button" onclick="togglePw('loginPassword',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">👁</button></div></div>
     <button class="auth-btn" id="loginBtn" onclick="doLogin()">Sign In</button>
     <div class="auth-spinner" id="loginSpinner"><div class="spinner spinner-auth"></div>Signing in...</div>
     <div class="auth-switch">No account? <span onclick="showRegister()">Create one</span></div>
@@ -1109,8 +1204,8 @@ body{transition:background .3s,color .3s;}
     <div class="auth-title">Create Account</div>
     <div class="auth-error" id="registerError"></div>
     <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="auth-field"><label>Password</label><div style="position:relative;"><input type="password" id="regPassword" placeholder="Min. 6 characters" autocomplete="new-password" style="padding-right:44px;"><button type="button" onclick="togglePw('regPassword',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">\ud83d\udc41</button></div></div>
-    <div class="auth-field"><label>Confirm Password</label><div style="position:relative;"><input type="password" id="regPassword2" placeholder="Repeat password" autocomplete="new-password" style="padding-right:44px;"><button type="button" onclick="togglePw('regPassword2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">\ud83d\udc41</button></div></div>
+    <div class="auth-field"><label>Password</label><div style="position:relative;"><input type="password" id="regPassword" placeholder="Min. 6 characters" autocomplete="new-password" style="padding-right:44px;"><button type="button" onclick="togglePw('regPassword',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">👁</button></div></div>
+    <div class="auth-field"><label>Confirm Password</label><div style="position:relative;"><input type="password" id="regPassword2" placeholder="Repeat password" autocomplete="new-password" style="padding-right:44px;"><button type="button" onclick="togglePw('regPassword2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted2);line-height:1;padding:0;">👁</button></div></div>
     <button class="auth-btn" id="registerBtn" onclick="doRegister()">Create Account</button>
     <div class="auth-spinner" id="registerSpinner"><div class="spinner spinner-auth"></div>Creating account...</div>
     <div class="auth-switch">Have an account? <span onclick="showLogin()">Sign in</span></div>
@@ -1152,8 +1247,8 @@ body{transition:background .3s,color .3s;}
       <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">?</div>
       <div class="user-dropdown" id="userDropdown">
         <div class="ud-email" id="udEmail">\u2014</div>
-        <div class="ud-item" onclick="exportData()">\ud83d\udce5 Export Data</div>
-        <div class="ud-item danger" onclick="doSignOut()">\ud83d\udeaa Sign Out</div>
+        <div class="ud-item" onclick="exportData()">📥 Export Data</div>
+        <div class="ud-item danger" onclick="doSignOut()">🚪 Sign Out</div>
       </div>
     </div>
   </div>
@@ -1197,7 +1292,7 @@ body{transition:background .3s,color .3s;}
   <div class="section-label">Training Status</div>
   <div id="trainingInsightCard" class="insight-card insight-nodata">
     <div class="ic-row">
-      <div class="ic-emoji" id="insightEmoji">\ud83d\udcca</div>
+      <div class="ic-emoji" id="insightEmoji">📊</div>
       <div class="ic-body">
         <div class="ic-status" id="insightStatus">NO DATA YET</div>
         <div class="ic-headline" id="insightHeadline">Start logging sessions</div>
@@ -1227,7 +1322,7 @@ body{transition:background .3s,color .3s;}
     <div class="section-label">Next Event</div>
     <div class="card" id="raceCountdownCard" style="background:linear-gradient(135deg,var(--card),var(--surface));border-color:var(--accent);">
       <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-size:32px;" id="raceIcon">\ud83c\udfc1</div>
+        <div style="font-size:32px;" id="raceIcon">🏁</div>
         <div style="flex:1;">
           <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--accent);" id="raceName">Event</div>
           <div style="font-size:11px;color:var(--muted2);" id="raceDate">\u2014</div>
@@ -1248,11 +1343,11 @@ body{transition:background .3s,color .3s;}
         <input type="text" id="eventName" placeholder="Race or event name" style="flex:2;min-width:120px;">
         <input type="date" id="eventDate" style="flex:1;min-width:110px;">
         <select id="eventType" style="flex:1;min-width:90px;">
-          <option value="\ud83d\udeb4">\ud83d\udeb4 Ride</option>
-          <option value="\ud83c\udfc3">\ud83c\udfc3 Run</option>
-          <option value="\ud83c\udfca">\ud83c\udfca Triathlon</option>
-          <option value="\ud83c\udfcb\ufe0f">\ud83c\udfcb\ufe0f Competition</option>
-          <option value="\ud83c\udfc1">\ud83c\udfc1 Other</option>
+          <option value="🚴">🚴 Ride</option>
+          <option value="🏃">🏃 Run</option>
+          <option value="🏊">🏊 Triathlon</option>
+          <option value="🏋\ufe0f">🏋\ufe0f Competition</option>
+          <option value="🏁">🏁 Other</option>
         </select>
         <button class="btn btn-primary" onclick="saveEvent()" style="flex-shrink:0;">Add</button>
       </div>
@@ -1262,11 +1357,11 @@ body{transition:background .3s,color .3s;}
   <!-- Sport streaks -->
   <div class="section-label">Streaks</div>
   <div class="streaks-row" id="streaksRow">
-    <div class="streak-box" id="streakLogging"><div class="streak-icon">\ud83c\udf7d\ufe0f</div><div class="streak-val zero" id="streakLoggingVal">0</div><div class="streak-lbl">Nutrition</div></div>
+    <div class="streak-box" id="streakLogging"><div class="streak-icon">🍽\ufe0f</div><div class="streak-val zero" id="streakLoggingVal">0</div><div class="streak-lbl">Nutrition</div></div>
     <div class="streak-box" id="streakExercise"><div class="streak-icon">\u26a1</div><div class="streak-val zero" id="streakExerciseVal">0</div><div class="streak-lbl">Training</div></div>
     <div class="streak-box" id="streakWeigh"><div class="streak-icon">\u2696\ufe0f</div><div class="streak-val zero" id="streakWeighVal">0</div><div class="streak-lbl">Check-in</div></div>
   </div>
-  <div class="health-banner"><div class="health-icon">\ud83c\udf4e</div><div class="health-text"><div class="ht-title">Apple Health \u2014 iOS App Coming</div><div class="ht-sub">HRV, sleep, and resting HR will feed into your readiness score when we launch the native app.</div></div></div>
+  <div class="health-banner"><div class="health-icon">🍎</div><div class="health-text"><div class="ht-title">Apple Health \u2014 iOS App Coming</div><div class="ht-sub">HRV, sleep, and resting HR will feed into your readiness score when we launch the native app.</div></div></div>
 </div>
 
 <!-- ACHIEVEMENT TOAST -->
@@ -1277,10 +1372,10 @@ body{transition:background .3s,color .3s;}
 <div class="view" id="view-train">
   <!-- Sport selector tabs -->
   <div class="sport-tabs">
-    <div class="sport-tab active" onclick="switchSport('gym',this)">\ud83c\udfcb\ufe0f Gym</div>
-    <div class="sport-tab" onclick="switchSport('ride',this)">\ud83d\udeb4 Ride</div>
-    <div class="sport-tab" onclick="switchSport('run',this)">\ud83c\udfc3 Run</div>
-    <div class="sport-tab" onclick="switchSport('swim',this)">\ud83c\udfca Swim</div>
+    <div class="sport-tab active" onclick="switchSport('gym',this)">🏋\ufe0f Gym</div>
+    <div class="sport-tab" onclick="switchSport('ride',this)">🚴 Ride</div>
+    <div class="sport-tab" onclick="switchSport('run',this)">🏃 Run</div>
+    <div class="sport-tab" onclick="switchSport('swim',this)">🏊 Swim</div>
     <div class="sport-tab" onclick="switchSport('log',this)">\u2795 Log</div>
   </div>
 
@@ -1309,7 +1404,7 @@ body{transition:background .3s,color .3s;}
         <div class="stretch-item" onclick="toggleStr(this,'A')"><div class="str-chk">\u2713</div><div><div class="str-name">Hip Flexors \u2014 tight from cycling</div><div class="str-desc">Kneeling stretch \u00b7 45\u201360s each side</div></div></div>
         <div class="stretch-item" onclick="toggleStr(this,'A')"><div class="str-chk">\u2713</div><div><div class="str-name">Hamstrings</div><div class="str-desc">Seated or standing \u00b7 30s</div></div></div>
       </div>
-      <div class="complete-banner" id="completeA"><div class="cb-emoji">\ud83d\udcaa</div><div class="cb-title">Push Session Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
+      <div class="complete-banner" id="completeA"><div class="cb-emoji">💪</div><div class="cb-title">Push Session Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
       <button class="reset-btn" onclick="resetSesh('A')">Reset Session</button>
     </div>
     <!-- Session B -->
@@ -1329,7 +1424,7 @@ body{transition:background .3s,color .3s;}
         <div class="stretch-item" onclick="toggleStr(this,'B')"><div class="str-chk">\u2713</div><div><div class="str-name">Chest & Shoulders</div><div class="str-desc">Doorframe \u00b7 30s each</div></div></div>
         <div class="stretch-item" onclick="toggleStr(this,'B')"><div class="str-chk">\u2713</div><div><div class="str-name">Hip Flexors</div><div class="str-desc">Kneeling \u00b7 45\u201360s each</div></div></div>
       </div>
-      <div class="complete-banner" id="completeB"><div class="cb-emoji">\ud83d\udcaa</div><div class="cb-title">Pull Session Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
+      <div class="complete-banner" id="completeB"><div class="cb-emoji">💪</div><div class="cb-title">Pull Session Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
       <button class="reset-btn" onclick="resetSesh('B')">Reset Session</button>
     </div>
     <!-- Session C -->
@@ -1349,7 +1444,7 @@ body{transition:background .3s,color .3s;}
         <div class="stretch-item" onclick="toggleStr(this,'C')"><div class="str-chk">\u2713</div><div><div class="str-name">Hamstrings</div><div class="str-desc">Seated or standing \u00b7 30\u201345s</div></div></div>
         <div class="stretch-item" onclick="toggleStr(this,'C')"><div class="str-chk">\u2713</div><div><div class="str-name">Lats & Back</div><div class="str-desc">Child's pose \u00b7 30\u201345s</div></div></div>
       </div>
-      <div class="complete-banner" id="completeC"><div class="cb-emoji">\ud83d\udcaa</div><div class="cb-title">Full Body Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
+      <div class="complete-banner" id="completeC"><div class="cb-emoji">💪</div><div class="cb-title">Full Body Done</div><div class="cb-text">Strong work. Fuel up and recover.</div></div>
       <button class="reset-btn" onclick="resetSesh('C')">Reset Session</button>
     </div>
   </div>
@@ -1358,7 +1453,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-ride">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--exlog);">
-        <div class="ep-sport">\ud83d\udeb4 Ride</div>
+        <div class="ep-sport">🚴 Ride</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Z1 Recovery</div><div class="zone-val">&lt;55% FTP</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Z2 Endurance</div><div class="zone-val">56\u201375% FTP</div></div>
@@ -1377,7 +1472,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-run">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--pull);">
-        <div class="ep-sport">\ud83c\udfc3 Run</div>
+        <div class="ep-sport">🏃 Run</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Easy / Recovery</div><div class="zone-val">60\u201370% HR max</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Aerobic Base</div><div class="zone-val">70\u201380% HR max</div></div>
@@ -1396,7 +1491,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-swim">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--blue);">
-        <div class="ep-sport">\ud83c\udfca Swim</div>
+        <div class="ep-sport">🏊 Swim</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Easy</div><div class="zone-val">Conversational pace</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Aerobic</div><div class="zone-val">Steady \u00b7 CSS +15s</div></div>
@@ -1415,10 +1510,10 @@ body{transition:background .3s,color .3s;}
       <div class="eli-title">Quick Log</div>
       <div class="eli-sub">Log any session manually \u2014 AI estimates calorie burn from type, duration, distance, and effort.</div>
       <div class="ex-type-grid">
-        <div class="ex-type-btn active" onclick="setExType('\ud83d\udeb4 Cycling',this)">\ud83d\udeb4 Cycling</div>
-        <div class="ex-type-btn" onclick="setExType('\ud83c\udfc3 Running',this)">\ud83c\udfc3 Running</div>
-        <div class="ex-type-btn" onclick="setExType('\ud83c\udfca Swimming',this)">\ud83c\udfca Swimming</div>
-        <div class="ex-type-btn" onclick="setExType('\ud83c\udfcb\ufe0f Weights',this)">\ud83c\udfcb\ufe0f Weights</div>
+        <div class="ex-type-btn active" onclick="setExType('🚴 Cycling',this)">🚴 Cycling</div>
+        <div class="ex-type-btn" onclick="setExType('🏃 Running',this)">🏃 Running</div>
+        <div class="ex-type-btn" onclick="setExType('🏊 Swimming',this)">🏊 Swimming</div>
+        <div class="ex-type-btn" onclick="setExType('🏋\ufe0f Weights',this)">🏋\ufe0f Weights</div>
         <div class="ex-type-btn" onclick="setExType('\u26a1 Other',this)">\u26a1 Other</div>
       </div>
       <div class="ex-fields">
@@ -1453,14 +1548,14 @@ body{transition:background .3s,color .3s;}
 
     <!-- Strava import (moved here, under Log) -->
     <div class="card" style="margin-top:4px;">
-      <div class="card-title" style="color:var(--exlog);">\ud83d\udfe0 Strava Import</div>
+      <div class="card-title" style="color:var(--exlog);">🟠 Strava Import</div>
       <div id="stravaNotConnected">
         <div style="font-size:12px;color:var(--muted2);margin-bottom:12px;line-height:1.6;">Connect Strava to import your activities automatically.</div>
         <button class="btn btn-ex btn-block" onclick="connectStrava()">Connect Strava</button>
       </div>
       <div id="stravaConnected" style="display:none;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <span style="font-size:18px;">\ud83d\udfe0</span>
+          <span style="font-size:18px;">🟠</span>
           <div><div style="font-size:13px;font-weight:500;color:var(--text);">Strava Connected</div><div style="font-size:11px;color:var(--muted);" id="stravaAthleteInfo">\u2014</div></div>
           <button class="del-btn" onclick="disconnectStrava()" style="margin-left:auto;" title="Disconnect">\u00d7</button>
         </div>
@@ -1518,7 +1613,7 @@ body{transition:background .3s,color .3s;}
   </div>
   <div class="water-card">
     <div class="water-header">
-      <span class="water-title">\ud83d\udca7 Water Intake</span>
+      <span class="water-title">💧 Water Intake</span>
       <span class="water-count" id="waterCountDisplay">0 / 8</span>
     </div>
     <div class="water-glasses" id="waterGlasses"></div>
@@ -1529,7 +1624,7 @@ body{transition:background .3s,color .3s;}
   </div>
   <div class="tabs">
     <div class="tab active" onclick="switchDietTab('log',this)">Log Food</div>
-    <div class="tab" onclick="switchDietTab('camera',this)">\ud83d\udcf7 Camera</div>
+    <div class="tab" onclick="switchDietTab('camera',this)">📷 Camera</div>
     <div class="tab" onclick="switchDietTab('recipe',this)">Recipe</div>
     <div class="tab" onclick="switchDietTab('history',this)">History</div>
   </div>
@@ -1574,14 +1669,14 @@ body{transition:background .3s,color .3s;}
       <div class="fi-title">Food Camera</div>
       <div class="fi-sub">Scan barcodes, photograph food for AI identification, or capture a nutrition label.</div>
       <div class="camera-mode-tabs">
-        <div class="cam-tab active" onclick="switchCamMode('barcode',this)">\ud83d\udce6 Barcode</div>
-        <div class="cam-tab" onclick="switchCamMode('identify',this)">\ud83c\udf54 Identify</div>
-        <div class="cam-tab" onclick="switchCamMode('label',this)">\ud83d\udccb Label</div>
+        <div class="cam-tab active" onclick="switchCamMode('barcode',this)">📦 Barcode</div>
+        <div class="cam-tab" onclick="switchCamMode('identify',this)">🍔 Identify</div>
+        <div class="cam-tab" onclick="switchCamMode('label',this)">📋 Label</div>
       </div>
       <!-- BARCODE -->
       <div class="cam-panel active" id="camPanel-barcode">
         <input type="file" id="barcodeFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodePhoto(this)">
-        <div class="camera-area" id="barcodeArea" onclick="document.getElementById('barcodeFileInput').click()"><div class="ca-icon">\ud83d\udcf7</div><div class="ca-text">Tap to scan barcode</div><div class="ca-sub">Takes a photo \u2014 AI reads the barcode</div></div>
+        <div class="camera-area" id="barcodeArea" onclick="document.getElementById('barcodeFileInput').click()"><div class="ca-icon">📷</div><div class="ca-text">Tap to scan barcode</div><div class="ca-sub">Takes a photo \u2014 AI reads the barcode</div></div>
         <div style="display:flex;gap:7px;margin-bottom:8px;margin-top:8px;"><input type="number" id="manualBarcode" placeholder="e.g. 5000157024380" style="flex:1;"><button class="btn btn-diet" onclick="lookupBarcode()">Look Up</button></div>
         <div class="thinking" id="barcodeThinking"><div class="spinner"></div>Looking up product...</div>
         <div class="barcode-result" id="barcodeResult">
@@ -1597,7 +1692,7 @@ body{transition:background .3s,color .3s;}
       <!-- IDENTIFY -->
       <div class="cam-panel" id="camPanel-identify">
         <input type="file" id="identifyFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile('identify',this)">
-        <div class="camera-area" id="identifyArea" onclick="document.getElementById('identifyFileInput').click()"><div class="ca-icon">\ud83c\udf54</div><div class="ca-text">Photograph your food</div><div class="ca-sub">AI identifies and estimates calories</div></div>
+        <div class="camera-area" id="identifyArea" onclick="document.getElementById('identifyFileInput').click()"><div class="ca-icon">🍔</div><div class="ca-text">Photograph your food</div><div class="ca-sub">AI identifies and estimates calories</div></div>
         <img id="identifyPreview" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;" alt="Food photo">
         <div class="cam-controls" id="identifyControls" style="display:none;"><button class="btn" onclick="retakePhoto('identify')">Retake</button><button class="btn btn-diet" onclick="analysePhoto('identify')">Identify Food \u2192</button></div>
         <div class="thinking" id="identifyThinking"><div class="spinner"></div>AI identifying your food...</div>
@@ -1611,7 +1706,7 @@ body{transition:background .3s,color .3s;}
       <!-- LABEL -->
       <div class="cam-panel" id="camPanel-label">
         <input type="file" id="labelFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile('label',this)">
-        <div class="camera-area" id="labelArea" onclick="document.getElementById('labelFileInput').click()"><div class="ca-icon">\ud83d\udccb</div><div class="ca-text">Photograph a nutrition label</div><div class="ca-sub">AI reads and extracts the data</div></div>
+        <div class="camera-area" id="labelArea" onclick="document.getElementById('labelFileInput').click()"><div class="ca-icon">📋</div><div class="ca-text">Photograph a nutrition label</div><div class="ca-sub">AI reads and extracts the data</div></div>
         <img id="labelPreview" style="display:none;width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover;" alt="Label photo">
         <div class="cam-controls" id="labelControls" style="display:none;"><button class="btn" onclick="retakePhoto('label')">Retake</button><button class="btn btn-diet" onclick="analysePhoto('label')">Extract Data \u2192</button></div>
         <div class="thinking" id="labelThinking"><div class="spinner"></div>AI reading nutrition label...</div>
@@ -1687,10 +1782,10 @@ body{transition:background .3s,color .3s;}
   <div class="section-label">Activity Log</div>
   <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;" id="logFilterBtns">
     <button class="btn active" style="font-size:11px;padding:5px 12px;" onclick="filterLog('all',this)">All</button>
-    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('\ud83d\udeb4 Cycling',this)">\ud83d\udeb4 Ride</button>
-    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('\ud83c\udfc3 Running',this)">\ud83c\udfc3 Run</button>
-    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('\ud83c\udfca Swimming',this)">\ud83c\udfca Swim</button>
-    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('\ud83c\udfcb\ufe0f Weights',this)">\ud83c\udfcb\ufe0f Gym</button>
+    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('🚴 Cycling',this)">🚴 Ride</button>
+    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('🏃 Running',this)">🏃 Run</button>
+    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('🏊 Swimming',this)">🏊 Swim</button>
+    <button class="btn" style="font-size:11px;padding:5px 12px;" onclick="filterLog('🏋\ufe0f Weights',this)">🏋\ufe0f Gym</button>
   </div>
   <div id="fullActivityLog"></div>
   <div id="fullActivityLogEmpty" style="text-align:center;padding:24px;color:var(--muted);font-size:12px;font-style:italic;display:none;">No activities yet.</div>
@@ -1698,7 +1793,7 @@ body{transition:background .3s,color .3s;}
 
 <!-- BODY -->
 <div class="view" id="view-body">
-  <div class="apple-health-banner"><div class="ah-icon">\ud83c\udf4e</div><div class="ah-text"><div class="ht">Apple Health \u2014 iOS App Coming</div><div class="hs">Body comp, HRV, and resting HR will auto-sync when we launch the native app.</div></div></div>
+  <div class="apple-health-banner"><div class="ah-icon">🍎</div><div class="ah-text"><div class="ht">Apple Health \u2014 iOS App Coming</div><div class="hs">Body comp, HRV, and resting HR will auto-sync when we launch the native app.</div></div></div>
 
   <!-- Weight targets -->
   <div class="card">
@@ -1742,7 +1837,7 @@ body{transition:background .3s,color .3s;}
 
   <!-- Goal projection -->
   <div class="goal-projection" id="goalProjection" style="display:none;">
-    <div class="gp-title">\ud83d\udcc8 On Track?</div>
+    <div class="gp-title">📈 On Track?</div>
     <div id="gpRows"></div>
   </div>
 
@@ -1930,12 +2025,12 @@ let obData={goals:[],experience:'',activity:'',age:'',sex:'',dietaryPrefs:[],cur
 let obStep=1;
 const GOALS=[
   {id:'weight_loss',icon:'\u2696\ufe0f',label:'Weight Loss',sub:'Lose fat, improve body composition'},
-  {id:'strength',icon:'\ud83d\udcaa',label:'Build Strength',sub:'Get stronger, add muscle mass'},
-  {id:'fitness',icon:'\ud83c\udfc3',label:'Fitness & Endurance',sub:'Cardio, stamina, performance'},
+  {id:'strength',icon:'💪',label:'Build Strength',sub:'Get stronger, add muscle mass'},
+  {id:'fitness',icon:'🏃',label:'Fitness & Endurance',sub:'Cardio, stamina, performance'},
   {id:'health',icon:'\u2764\ufe0f',label:'General Health',sub:'Feel better, live healthier'},
-  {id:'sport',icon:'\ud83d\udeb4',label:'Sport Performance',sub:'Train for cycling, running, etc.'},
+  {id:'sport',icon:'🚴',label:'Sport Performance',sub:'Train for cycling, running, etc.'},
   {id:'tone',icon:'\u2728',label:'Tone & Shape',sub:'Lean, defined physique'},
-  {id:'flexibility',icon:'\ud83e\uddd8',label:'Flexibility',sub:'Mobility, movement quality'},
+  {id:'flexibility',icon:'🧘',label:'Flexibility',sub:'Mobility, movement quality'},
 ];
 const DIET_PREFS=['No restrictions','Vegetarian','Vegan','Gluten-free','Dairy-free','Low carb','High protein','Halal','Kosher'];
 const ACTIVITY_OPTS=[
@@ -1966,7 +2061,7 @@ function renderObStep(){
   } else if(obStep===5){
     body.innerHTML=`<div class="ob-question">Dietary preferences?</div><div class="ob-sub">We'll factor these into your nutrition guidance.</div><div class="ob-chips">${DIET_PREFS.map(d=>`<div class="ob-chip ${obData.dietaryPrefs.includes(d)?'selected':''}" onclick="toggleDiet('${d}',this)">${d}</div>`).join('')}</div><div class="ob-nav"><button class="ob-back" onclick="obBack()">\u2190</button><button class="ob-next" onclick="obNext()">Generate My Plan \u2192</button></div>`;
   } else if(obStep===6){
-    body.innerHTML=`<div class="ob-generating"><div class="ob-gen-icon">\ud83e\udd16</div><div class="ob-gen-title">Building Your Plan</div><div class="ob-gen-sub">Claude is analysing your goals and creating a personalised programme just for you.</div><div class="ob-gen-steps"><div class="ob-gen-step active" id="gs1"><span class="gs-icon">\u2699\ufe0f</span>Calculating your calorie targets...</div><div class="ob-gen-step" id="gs2"><span class="gs-icon">\ud83c\udfcb\ufe0f</span>Tailoring your workout sessions...</div><div class="ob-gen-step" id="gs3"><span class="gs-icon">\ud83e\udd57</span>Setting up your nutrition plan...</div><div class="ob-gen-step" id="gs4"><span class="gs-icon">\u2705</span>Finalising your personalised plan...</div></div></div>`;
+    body.innerHTML=`<div class="ob-generating"><div class="ob-gen-icon">🤖</div><div class="ob-gen-title">Building Your Plan</div><div class="ob-gen-sub">Claude is analysing your goals and creating a personalised programme just for you.</div><div class="ob-gen-steps"><div class="ob-gen-step active" id="gs1"><span class="gs-icon">\u2699\ufe0f</span>Calculating your calorie targets...</div><div class="ob-gen-step" id="gs2"><span class="gs-icon">🏋\ufe0f</span>Tailoring your workout sessions...</div><div class="ob-gen-step" id="gs3"><span class="gs-icon">🥗</span>Setting up your nutrition plan...</div><div class="ob-gen-step" id="gs4"><span class="gs-icon">\u2705</span>Finalising your personalised plan...</div></div></div>`;
     generatePlan();
   }
 }
@@ -2013,18 +2108,18 @@ function showPlanResult(plan){
   document.getElementById('obStepLabel').textContent='Your personalised plan';
   document.getElementById('obStepDots').innerHTML=Array.from({length:OB_STEPS},()=>`<div class="ob-step-dot done"></div>`).join('');
   document.getElementById('obBody').innerHTML=`
-    <div class="ob-plan-card"><div class="ob-plan-title">Your Plan Is Ready \ud83c\udfaf</div><div class="ob-plan-text">${plan.welcome_message}</div></div>
+    <div class="ob-plan-card"><div class="ob-plan-title">Your Plan Is Ready 🎯</div><div class="ob-plan-text">${plan.welcome_message}</div></div>
     <div class="ob-plan-card">
       <div class="ob-plan-title">Daily Targets</div>
-      <div class="ob-plan-stat"><span class="ob-plan-stat-icon">\ud83d\udd25</span><div><div class="ob-plan-stat-label">Calorie Goal</div><div class="ob-plan-stat-val">${plan.calorie_goal} kcal</div></div></div>
-      <div class="ob-plan-stat"><span class="ob-plan-stat-icon">\ud83e\udd69</span><div><div class="ob-plan-stat-label">Protein Target</div><div class="ob-plan-stat-val">${plan.protein_goal_g}g / day</div></div></div>
+      <div class="ob-plan-stat"><span class="ob-plan-stat-icon">🔥</span><div><div class="ob-plan-stat-label">Calorie Goal</div><div class="ob-plan-stat-val">${plan.calorie_goal} kcal</div></div></div>
+      <div class="ob-plan-stat"><span class="ob-plan-stat-icon">🥩</span><div><div class="ob-plan-stat-label">Protein Target</div><div class="ob-plan-stat-val">${plan.protein_goal_g}g / day</div></div></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic;">${plan.calorie_rationale}</div>
     </div>
     <div class="ob-plan-card">
       <div class="ob-plan-title">Key Focus Areas</div>
       ${(plan.key_tips||[]).map(t=>`<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted2);line-height:1.4;"><span style="color:var(--accent);flex-shrink:0;margin-top:1px;">\u2192</span>${t}</div>`).join('')}
     </div>
-    <div class="ob-nav" style="margin-top:4px;"><button class="ob-next" onclick="finishOnboarding()">Start Training \ud83d\ude80</button></div>`;
+    <div class="ob-nav" style="margin-top:4px;"><button class="ob-next" onclick="finishOnboarding()">Start Training 🚀</button></div>`;
 }
 function finishOnboarding(){document.getElementById('onboardScreen').classList.remove('show');document.body.classList.add('authed');applyPrefs();loadAllData();showInstallPrompt();}
 
@@ -2136,10 +2231,10 @@ function updateDashboard(){
   // Determine today's sport from exercise log
   const todayTypes=state.exerciseLog.map(e=>e.type||'');
   let todaySport='Rest Day',todayReadiness='Recovery & fuelling day';
-  if(todayTypes.some(t=>t.includes('Cycling'))){todaySport='\ud83d\udeb4 Ride Day';todayReadiness='High carbs \u00b7 Electrolytes \u00b7 Pre-load';}
-  else if(todayTypes.some(t=>t.includes('Running'))){todaySport='\ud83c\udfc3 Run Day';todayReadiness='Moderate carbs \u00b7 Post-run protein';}
-  else if(todayTypes.some(t=>t.includes('Swimming'))){todaySport='\ud83c\udfca Swim Day';todayReadiness='Moderate carbs \u00b7 Protein \u00b7 Hydration';}
-  else if(todayTypes.some(t=>t.includes('Weights'))){todaySport='\ud83c\udfcb\ufe0f Gym Day';todayReadiness='Protein focus \u00b7 Moderate carbs';}
+  if(todayTypes.some(t=>t.includes('Cycling'))){todaySport='🚴 Ride Day';todayReadiness='High carbs \u00b7 Electrolytes \u00b7 Pre-load';}
+  else if(todayTypes.some(t=>t.includes('Running'))){todaySport='🏃 Run Day';todayReadiness='Moderate carbs \u00b7 Post-run protein';}
+  else if(todayTypes.some(t=>t.includes('Swimming'))){todaySport='🏊 Swim Day';todayReadiness='Moderate carbs \u00b7 Protein \u00b7 Hydration';}
+  else if(todayTypes.some(t=>t.includes('Weights'))){todaySport='🏋\ufe0f Gym Day';todayReadiness='Protein focus \u00b7 Moderate carbs';}
   const sportEl=document.getElementById('dashSportTag');
   const readEl=document.getElementById('dashReadiness');
   if(sportEl)sportEl.textContent=todaySport;
@@ -2173,10 +2268,10 @@ function renderWeekVolume(containerId){
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay()+1);weekStart.setHours(0,0,0,0);
   const weekLogs=state.exerciseLog.filter(e=>e.date>=weekStart.toISOString().slice(0,10));
   const sports=[
-    {key:'\ud83d\udeb4 Cycling',label:'Ride',icon:'\ud83d\udeb4',unit:'km',color:'var(--exlog)',metric:e=>e.distance||0},
-    {key:'\ud83c\udfc3 Running',label:'Run',icon:'\ud83c\udfc3',unit:'km',color:'var(--pull)',metric:e=>e.distance||0},
-    {key:'\ud83c\udfca Swimming',label:'Swim',icon:'\ud83c\udfca',unit:'km',color:'var(--blue)',metric:e=>e.distance||0},
-    {key:'\ud83c\udfcb\ufe0f Weights',label:'Gym',icon:'\ud83c\udfcb\ufe0f',unit:'min',color:'var(--push)',metric:e=>e.duration||0},
+    {key:'🚴 Cycling',label:'Ride',icon:'🚴',unit:'km',color:'var(--exlog)',metric:e=>e.distance||0},
+    {key:'🏃 Running',label:'Run',icon:'🏃',unit:'km',color:'var(--pull)',metric:e=>e.distance||0},
+    {key:'🏊 Swimming',label:'Swim',icon:'🏊',unit:'km',color:'var(--blue)',metric:e=>e.distance||0},
+    {key:'🏋\ufe0f Weights',label:'Gym',icon:'🏋\ufe0f',unit:'min',color:'var(--push)',metric:e=>e.duration||0},
   ];
   el.innerHTML=sports.map(s=>{
     const entries=weekLogs.filter(e=>e.type&&e.type.includes(s.label.includes('Ride')?'Cycl':s.label.includes('Run')?'Runn':s.label.includes('Swim')?'Swim':'Weight'));
@@ -2255,7 +2350,7 @@ function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
   // No data state
   if(ctl<1){
     card.className='insight-card insight-nodata';
-    if(emoji)emoji.textContent='\ud83d\udcca';
+    if(emoji)emoji.textContent='📊';
     if(status)status.textContent='NO DATA YET';
     if(headline)headline.textContent='Start logging sessions';
     if(detail)detail.textContent='Log your first training session to see personalised load guidance here.';
@@ -2280,7 +2375,7 @@ function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
   if(tsb>15){
     state_name='fresh';
     card.className='insight-card insight-fresh';
-    if(emoji)emoji.textContent='\ud83d\udfe2';
+    if(emoji)emoji.textContent='🟢';
     if(status)status.textContent='RACE READY';
     if(headline)headline.textContent='You are peaking right now';
     if(detail)detail.textContent='Your form (TSB '+tsb+') is excellent. Fitness base of CTL '+ctl+' with low fatigue. This is the ideal window to race or test yourself.';
@@ -2296,7 +2391,7 @@ function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
   } else if(tsb>=-5){
     state_name='neutral';
     card.className='insight-card insight-neutral';
-    if(emoji)emoji.textContent='\ud83d\udfe1';
+    if(emoji)emoji.textContent='🟡';
     if(status)status.textContent='TRAINING LOAD: BALANCED';
     if(headline)headline.textContent='Steady state — keep building';
     if(detail)detail.textContent='Your fatigue and fitness are balanced (TSB '+tsb+'). CTL is '+ctl+'. This is a sustainable training zone — keep the consistency going.';
@@ -2304,7 +2399,7 @@ function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
   } else if(tsb>=-15){
     state_name='fatigued';
     card.className='insight-card insight-fatigued';
-    if(emoji)emoji.textContent='\ud83d\udd34';
+    if(emoji)emoji.textContent='🔴';
     if(status)status.textContent='CARRYING FATIGUE';
     if(headline)headline.textContent='Your body is under load — manage carefully';
     if(detail)detail.textContent='Fatigue (ATL '+atl+') is exceeding fitness (CTL '+ctl+'). TSB '+tsb+' indicates accumulated stress. This is normal in a build phase but needs monitoring.';
@@ -2312,7 +2407,7 @@ function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
   } else {
     state_name='fatigued';
     card.className='insight-card insight-fatigued';
-    if(emoji)emoji.textContent='\ud83d\udee1\ufe0f';
+    if(emoji)emoji.textContent='🛡\ufe0f';
     if(status)status.textContent='HIGH FATIGUE — REST NEEDED';
     if(headline)headline.textContent='Significant overload — prioritise recovery';
     if(detail)detail.textContent='You are significantly fatigued (TSB '+tsb+'). Continuing hard training risks injury and burnout. Your body needs to absorb the work done.';
@@ -2355,7 +2450,7 @@ function updateRaceCountdown(){
     document.getElementById('raceName').textContent=ev.name;
     document.getElementById('raceDate').textContent=new Date(ev.date).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     document.getElementById('raceDays').textContent=days;
-    document.getElementById('raceIcon').textContent=ev.icon||'\ud83c\udfc1';
+    document.getElementById('raceIcon').textContent=ev.icon||'🏁';
   }catch(e){}
 }
 
@@ -2392,7 +2487,7 @@ function renderEnduranceWorkouts(sport){
     {type:'Z2 Endurance',name:'Steady Base Ride',desc:'90 min @ 65% FTP. Conversational pace, high fat oxidation. Perfect for aerobic base building.'},
     {type:'Threshold',name:'2\u00d720 Threshold',desc:'2 \u00d7 20 min @ 95\u2013100% FTP with 5 min rest. The cornerstone of cycling fitness.'},
     {type:'VO2 Max',name:'5\u00d75 Smash',desc:'5 \u00d7 5 min @ 110\u2013120% FTP with 5 min easy. Raises your ceiling.'},
-    {type:'Recovery',name:'Easy Spin',desc:'45\u201360 min @ <55% FTP. Actively flush legs \u2014 don\\'t go too easy or skip.'},
+    {type:'Recovery',name:'Easy Spin',desc:'45\u201360 min @ <55% FTP. Actively flush legs \u2014 don\'t go too easy or skip.'},
   ]:[
     {type:'Easy Run',name:'Zone 2 Aerobic',desc:'45\u201360 min at comfortable effort. Should hold a conversation. The majority of your run volume should be here.'},
     {type:'Tempo',name:'20 Min Tempo',desc:'10 min easy, 20 min at comfortably hard, 10 min easy. Improves lactate threshold.'},
@@ -2442,7 +2537,7 @@ async function logEndurance(sport){
   const hr=document.getElementById(sport+'HR')?.value;
   const notes=document.getElementById(sport+'Notes')?.value||'';
   if(!dur){alert('Enter duration');return;}
-  const typeMap={ride:'\ud83d\udeb4 Cycling',run:'\ud83c\udfc3 Running',swim:'\ud83c\udfca Swimming'};
+  const typeMap={ride:'🚴 Cycling',run:'🏃 Running',swim:'🏊 Swimming'};
   const effort=enduranceEffort[sport]||'Moderate';
   const entry={user_id:currentUser.id,date:todayKey(),type:typeMap[sport],duration:parseInt(dur),distance:dist?parseFloat(dist):null,hr:hr?parseInt(hr):null,effort,notes,cals:0,description:typeMap[sport]};
   try{
@@ -2517,10 +2612,10 @@ function renderPersonalBests(){
   const el=document.getElementById('pbGrid');if(!el)return;
   const allLogs=state.exerciseLog;
   const bests=[
-    {sport:'\ud83d\udeb4',label:'Longest Ride',filter:e=>e.type&&e.type.includes('Cycl')&&e.distance,val:e=>e.distance,unit:'km',format:v=>v.toFixed(1)+'km'},
-    {sport:'\ud83c\udfc3',label:'Longest Run',filter:e=>e.type&&e.type.includes('Runn')&&e.distance,val:e=>e.distance,unit:'km',format:v=>v.toFixed(1)+'km'},
-    {sport:'\ud83d\udeb4',label:'Most Cals \u2014 Ride',filter:e=>e.type&&e.type.includes('Cycl')&&e.cals,val:e=>e.cals,unit:'kcal',format:v=>v+'kcal'},
-    {sport:'\ud83c\udfcb\ufe0f',label:'Longest Gym',filter:e=>e.type&&e.type.includes('Weight')&&e.duration,val:e=>e.duration,unit:'min',format:v=>v+'min'},
+    {sport:'🚴',label:'Longest Ride',filter:e=>e.type&&e.type.includes('Cycl')&&e.distance,val:e=>e.distance,unit:'km',format:v=>v.toFixed(1)+'km'},
+    {sport:'🏃',label:'Longest Run',filter:e=>e.type&&e.type.includes('Runn')&&e.distance,val:e=>e.distance,unit:'km',format:v=>v.toFixed(1)+'km'},
+    {sport:'🚴',label:'Most Cals \u2014 Ride',filter:e=>e.type&&e.type.includes('Cycl')&&e.cals,val:e=>e.cals,unit:'kcal',format:v=>v+'kcal'},
+    {sport:'🏋\ufe0f',label:'Longest Gym',filter:e=>e.type&&e.type.includes('Weight')&&e.duration,val:e=>e.duration,unit:'min',format:v=>v+'min'},
   ];
   el.innerHTML=bests.map(b=>{
     const matching=allLogs.filter(b.filter);
@@ -2544,7 +2639,7 @@ function renderActivityLog(filter){
   if(!el)return;
   // Use both today's and all historical data; for now use state.exerciseLog + exerciseHistory
   let logs=[...state.exerciseLog];
-  if(filter!=='all')logs=logs.filter(e=>e.type&&e.type.includes(filter.replace('\ud83d\udeb4 Cycling','Cycl').replace('\ud83c\udfc3 Running','Runn').replace('\ud83c\udfca Swimming','Swim').replace('\ud83c\udfcb\ufe0f Weights','Weight')));
+  if(filter!=='all')logs=logs.filter(e=>e.type&&e.type.includes(filter.replace('🚴 Cycling','Cycl').replace('🏃 Running','Runn').replace('🏊 Swimming','Swim').replace('🏋\ufe0f Weights','Weight')));
   logs=[...logs].reverse();
   if(!logs.length){el.innerHTML='';if(empty)empty.style.display='block';return;}
   if(empty)empty.style.display='none';
@@ -2615,19 +2710,19 @@ function updateStreaksAndAchievements(){
       const isLosing=tw<cw;
       const onTrack=isLosing?rate<0:rate>0;
       gpRows.push(`<div class="gp-row"><span class="gp-icon">${onTrack?'\u2705':'\u26a0\ufe0f'}</span><div><div class="gp-label">Weekly trend</div><div class="gp-val ${onTrack?'good':'bad'}">${rate>0?'+':''}${weeklyRate}kg/week</div></div></div>`);
-      gpRows.push(`<div class="gp-row"><span class="gp-icon">\ud83d\udcc5</span><div><div class="gp-label">Estimated goal date</div><div class="gp-val ${onTrack?'good':'warn'}">${onTrack?goalDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Adjust your plan'}</div></div></div>`);
-      gpRows.push(`<div class="gp-row"><span class="gp-icon">\ud83c\udfaf</span><div><div class="gp-label">To go</div><div class="gp-val">${Math.abs(remaining).toFixed(1)}kg ${isLosing?'to lose':'to gain'}</div></div></div>`);
+      gpRows.push(`<div class="gp-row"><span class="gp-icon">📅</span><div><div class="gp-label">Estimated goal date</div><div class="gp-val ${onTrack?'good':'warn'}">${onTrack?goalDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Adjust your plan'}</div></div></div>`);
+      gpRows.push(`<div class="gp-row"><span class="gp-icon">🎯</span><div><div class="gp-label">To go</div><div class="gp-val">${Math.abs(remaining).toFixed(1)}kg ${isLosing?'to lose':'to gain'}</div></div></div>`);
     }
     if(loggingStreak>=3){
       const avgCals=state.foodLog.reduce((a,f)=>a+(f.cals||0),0);
       const goal=state.prefs.cal_goal||2000;
       const diff=avgCals-goal;
-      const txt=Math.abs(diff)<100?'Right on target \ud83c\udfaf':diff<0?`${Math.abs(diff)} under goal`:`${diff} over goal`;
+      const txt=Math.abs(diff)<100?'Right on target 🎯':diff<0?`${Math.abs(diff)} under goal`:`${diff} over goal`;
       const cls=Math.abs(diff)<100?'good':diff<0?'warn':'bad';
-      gpRows.push(`<div class="gp-row"><span class="gp-icon">\ud83c\udf7d\ufe0f</span><div><div class="gp-label">Today's calories vs goal</div><div class="gp-val ${cls}">${txt}</div></div></div>`);
+      gpRows.push(`<div class="gp-row"><span class="gp-icon">🍽\ufe0f</span><div><div class="gp-label">Today's calories vs goal</div><div class="gp-val ${cls}">${txt}</div></div></div>`);
     }
   } else if(cw&&tw){
-    gpRows.push(`<div class="gp-row"><span class="gp-icon">\ud83d\udca1</span><div><div class="gp-label">Tip</div><div class="gp-val">Log 2+ weigh-ins to see your projection</div></div></div>`);
+    gpRows.push(`<div class="gp-row"><span class="gp-icon">💡</span><div><div class="gp-label">Tip</div><div class="gp-val">Log 2+ weigh-ins to see your projection</div></div></div>`);
   }
   const gpEl=document.getElementById('goalProjection');
   if(gpRows.length){gpEl.style.display='block';document.getElementById('gpRows').innerHTML=gpRows.join('');}
@@ -2635,21 +2730,21 @@ function updateStreaksAndAchievements(){
 
   // --- ACHIEVEMENTS ---
   const ACHIEVEMENTS=[
-    {id:'first_log',icon:'\ud83c\udf7d\ufe0f',name:'First Fuel',desc:'Log your first meal',check:()=>state.foodHistory.length>0},
-    {id:'log_streak_3',icon:'\ud83d\udd25',name:'3-Day Logger',desc:'Log meals 3 days in a row',check:()=>loggingStreak>=3},
-    {id:'log_streak_7',icon:'\ud83d\udd25\ud83d\udd25',name:'Week Warrior',desc:'Log meals 7 days in a row',check:()=>loggingStreak>=7},
-    {id:'log_streak_30',icon:'\ud83d\udc51',name:'Monthly Master',desc:'Log meals 30 days in a row',check:()=>loggingStreak>=30},
+    {id:'first_log',icon:'🍽\ufe0f',name:'First Fuel',desc:'Log your first meal',check:()=>state.foodHistory.length>0},
+    {id:'log_streak_3',icon:'🔥',name:'3-Day Logger',desc:'Log meals 3 days in a row',check:()=>loggingStreak>=3},
+    {id:'log_streak_7',icon:'🔥🔥',name:'Week Warrior',desc:'Log meals 7 days in a row',check:()=>loggingStreak>=7},
+    {id:'log_streak_30',icon:'👑',name:'Monthly Master',desc:'Log meals 30 days in a row',check:()=>loggingStreak>=30},
     {id:'first_exercise',icon:'\u26a1',name:'First Session',desc:'Log your first training session',check:()=>state.exerciseHistory.length>0},
-    {id:'exercise_streak_3',icon:'\ud83c\udfc5',name:'3-Day Athlete',desc:'Train 3 days in a row',check:()=>exerciseStreak>=3},
-    {id:'exercise_streak_7',icon:'\ud83c\udfc6',name:'7-Day Athlete',desc:'Train 7 days in a row',check:()=>exerciseStreak>=7},
-    {id:'first_ride',icon:'\ud83d\udeb4',name:'First Ride',desc:'Log your first cycling session',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Cycl'))},
-    {id:'century_ride',icon:'\ud83d\udc9b',name:'Long Ride',desc:'Log a ride of 80km+',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Cycl')&&(e.distance||0)>=80)},
-    {id:'first_run',icon:'\ud83c\udfc3',name:'First Run',desc:'Log your first run',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Runn'))},
-    {id:'10k_run',icon:'\ud83c\udfbd',name:'10K Club',desc:'Log a run of 10km+',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Runn')&&(e.distance||0)>=10)},
-    {id:'first_swim',icon:'\ud83c\udfca',name:'First Swim',desc:'Log your first swim',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Swim'))},
+    {id:'exercise_streak_3',icon:'🏅',name:'3-Day Athlete',desc:'Train 3 days in a row',check:()=>exerciseStreak>=3},
+    {id:'exercise_streak_7',icon:'🏆',name:'7-Day Athlete',desc:'Train 7 days in a row',check:()=>exerciseStreak>=7},
+    {id:'first_ride',icon:'🚴',name:'First Ride',desc:'Log your first cycling session',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Cycl'))},
+    {id:'century_ride',icon:'💛',name:'Long Ride',desc:'Log a ride of 80km+',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Cycl')&&(e.distance||0)>=80)},
+    {id:'first_run',icon:'🏃',name:'First Run',desc:'Log your first run',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Runn'))},
+    {id:'10k_run',icon:'🎽',name:'10K Club',desc:'Log a run of 10km+',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Runn')&&(e.distance||0)>=10)},
+    {id:'first_swim',icon:'🏊',name:'First Swim',desc:'Log your first swim',check:()=>state.exerciseLog.some(e=>e.type&&e.type.includes('Swim'))},
     {id:'first_weigh',icon:'\u2696\ufe0f',name:'First Check-In',desc:'Log your first weigh-in',check:()=>state.weightLog.length>0},
-    {id:'hit_goal',icon:'\ud83c\udfaf',name:'Goal Reached',desc:'Reach your target weight',check:()=>{const cw=state.weightLog.length?state.weightLog[state.weightLog.length-1].weight:null;const tw=parseFloat(state.prefs.target_weight);if(!cw||!tw)return false;const start=parseFloat(state.prefs.current_weight)||cw;return start>tw?cw<=tw:cw>=tw;}},
-    {id:'water_day',icon:'\ud83d\udca7',name:'Hydrated',desc:'Hit 8 glasses in a day',check:()=>(state.prefs.water||0)>=8},
+    {id:'hit_goal',icon:'🎯',name:'Goal Reached',desc:'Reach your target weight',check:()=>{const cw=state.weightLog.length?state.weightLog[state.weightLog.length-1].weight:null;const tw=parseFloat(state.prefs.target_weight);if(!cw||!tw)return false;const start=parseFloat(state.prefs.current_weight)||cw;return start>tw?cw<=tw:cw>=tw;}},
+    {id:'water_day',icon:'💧',name:'Hydrated',desc:'Hit 8 glasses in a day',check:()=>(state.prefs.water||0)>=8},
     {id:'calorie_goal',icon:'\u2705',name:'On Target',desc:'Stay within 100kcal of your calorie goal',check:()=>{const cal=state.foodLog.reduce((a,f)=>a+(f.cals||0),0);const g=state.prefs.cal_goal||2000;return Math.abs(cal-g)<=100&&cal>0;}},
   ];
 
@@ -2679,7 +2774,7 @@ function updateStreaksAndAchievements(){
 
 function showAchievementToast(name){
   const toast=document.getElementById('achievementToast');
-  toast.textContent='\ud83c\udfc6 Achievement Unlocked: '+name;
+  toast.textContent='🏆 Achievement Unlocked: '+name;
   toast.classList.remove('show');
   void toast.offsetWidth; // reflow to restart animation
   toast.classList.add('show');
@@ -2850,7 +2945,7 @@ async function generateDiagram(cardId,exName){
   if(diagramCache[exName]){el.innerHTML=diagramCache[exName];return;}
   try{
     const svg=await callClaude(`Create a minimal SVG stick figure diagram showing correct form for "${exName}". Output ONLY the SVG element, no explanation. Use viewBox="0 0 200 140", stroke="#e8ff47", stroke-width="2", fill="none", background rect fill="#1a1a1a". Keep it simple \u2014 just lines and circles for joints.`);
-    const match=svg.match(/<svg[\\s\\S]*?<\\/svg>/i);
+    const match=svg.match(/<svg[\s\S]*?<\/svg>/i);
     if(match){diagramCache[exName]=match[0];el.innerHTML=match[0];}
     else el.innerHTML='<div style="color:var(--muted);font-size:11px;padding:8px;">Form diagram unavailable</div>';
   }catch(e){el.innerHTML='<div style="color:var(--muted);font-size:11px;padding:8px;">Form diagram unavailable</div>';}
@@ -2886,7 +2981,7 @@ function resetSesh(id){
 function initWater(){
   const w=state.prefs.water||0,el=document.getElementById('waterGlasses');if(!el)return;
   el.innerHTML='';
-  for(let i=0;i<8;i++)el.innerHTML+=`<div class="glass-btn ${i<w?'filled':''}" onclick="toggleGlass(${i})">\ud83d\udca7</div>`;
+  for(let i=0;i<8;i++)el.innerHTML+=`<div class="glass-btn ${i<w?'filled':''}" onclick="toggleGlass(${i})">💧</div>`;
   const wcd=document.getElementById('waterCountDisplay');if(wcd)wcd.textContent=w+' / 8';
   const dwc=document.getElementById('dietWaterCount');if(dwc)dwc.textContent=w+'/8';
 }
@@ -3038,7 +3133,7 @@ function renderFoodLog(){
   const list=document.getElementById('mealLogList'),empty=document.getElementById('mealLogEmpty');
   if(!state.foodLog.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  list.innerHTML=[...state.foodLog].reverse().map(f=>`<div class="meal-log-item"><div class="mli-left"><div class="mli-name">${f.name}</div><div class="mli-meta">${f.source==='barcode'?'\ud83d\udce6 Scanned':f.source==='recipe'?'\ud83c\udf73 Recipe':'\ud83e\udd16 AI'}${f.protein?` \u00b7 ${f.protein}g protein`:''}</div></div><div class="mli-right"><div class="mli-cals">${f.cals}</div><div class="mli-unit">kcal</div></div><button class="del-btn" onclick="deleteFoodEntry('${f.id}')">\u00d7</button></div>`).join('');
+  list.innerHTML=[...state.foodLog].reverse().map(f=>`<div class="meal-log-item"><div class="mli-left"><div class="mli-name">${f.name}</div><div class="mli-meta">${f.source==='barcode'?'📦 Scanned':f.source==='recipe'?'🍳 Recipe':'🤖 AI'}${f.protein?` \u00b7 ${f.protein}g protein`:''}</div></div><div class="mli-right"><div class="mli-cals">${f.cals}</div><div class="mli-unit">kcal</div></div><button class="del-btn" onclick="deleteFoodEntry('${f.id}')">\u00d7</button></div>`).join('');
 }
 async function deleteFoodEntry(id){await sb.from('food_log').delete().eq('id',id);state.foodLog=state.foodLog.filter(f=>f.id!==id);renderFoodLog();updateGoalBar();updateDietSummary();updateOverview();}
 async function clearFoodLog(){await sb.from('food_log').delete().eq('user_id',currentUser.id).eq('date',todayKey());state.foodLog=[];renderFoodLog();updateGoalBar();updateDietSummary();updateOverview();}
@@ -3203,7 +3298,7 @@ async function calcRecipe(){
 }
 
 // EXERCISE
-let exType='\ud83d\udeb4 Cycling',effort='Easy';
+let exType='🚴 Cycling',effort='Easy';
 function setExType(t,btn){exType=t;document.querySelectorAll('.ex-type-btn').forEach(el=>el.classList.remove('active'));btn.classList.add('active');}
 function setEffort(e,btn){effort=e;document.querySelectorAll('.effort-btn').forEach(el=>el.classList.remove('active'));btn.classList.add('active');}
 async function logExercise(){
@@ -3452,7 +3547,7 @@ async function importFromStrava() {
         <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:12px;">
           <div style="flex:1;min-width:0;">
             <div style="font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              \ud83d\udfe0 ${a.type || 'Activity'} \u00b7 ${a.name || 'Untitled'}
+              🟠 ${a.type || 'Activity'} \u00b7 ${a.name || 'Untitled'}
             </div>
             <div style="color:var(--muted);font-size:11px;">
               ${date} \u00b7 ${mins}min${km ? ' \u00b7 ' + km : ''}
@@ -3481,13 +3576,13 @@ async function logStravaActivity(a) {
 
   // Map Strava types to your existing internal types
   const typeMap = {
-    Run: '\ud83c\udfc3 Running',
-    Ride: '\ud83d\udeb4 Cycling',
-    VirtualRide: '\ud83d\udeb4 Cycling',
+    Run: '🏃 Running',
+    Ride: '🚴 Cycling',
+    VirtualRide: '🚴 Cycling',
     Walk: '\u26a1 Other',
-    Swim: '\ud83c\udfca Swimming',
-    WeightTraining: '\ud83c\udfcb\ufe0f Weights',
-    Workout: '\ud83c\udfcb\ufe0f Weights',
+    Swim: '🏊 Swimming',
+    WeightTraining: '🏋\ufe0f Weights',
+    Workout: '🏋\ufe0f Weights',
     Yoga: '\u26a1 Other',
     Hike: '\u26a1 Other'
   };
