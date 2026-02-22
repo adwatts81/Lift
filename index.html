@@ -580,6 +580,27 @@ input:focus,select:focus,textarea:focus{
   main{padding:14px 22px;}
 }
 
+
+/* ── MIND & BODY ── */
+.mind-type-btn{
+  background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:0.5px solid var(--glass-border);border-radius:14px;
+  padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.mind-type-btn.active{border-color:var(--pull);background:rgba(34,216,143,.08);}
+.mind-type-btn:hover:not(.active){border-color:var(--border2);}
+
+/* ── PT GOAL BANNER ── */
+.pt-goal-banner{
+  border-radius:14px;padding:12px 14px;margin-bottom:12px;
+  background:linear-gradient(135deg,rgba(200,255,0,.10),rgba(79,140,255,.06));
+  border:0.5px solid rgba(200,255,0,.2);
+  font-size:12px;color:var(--text2);line-height:1.5;
+  display:none;
+}
+.pt-goal-banner.show{display:block;}
+.pt-goal-banner strong{color:var(--accent);font-size:13px;display:block;margin-bottom:3px;}
+
 /* AUTH */
 #authScreen{
   position:fixed;inset:0;
@@ -1364,6 +1385,22 @@ body{transition:background .3s,color .3s;}
   </div>
 
   <!-- Sport streaks -->
+
+  <div class="section-label" id="ptCoachLabel">Your PT Today</div>
+  <div class="card" id="ptCoachCard" style="margin-bottom:10px;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--accent-dim);border:0.5px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:4px;">COACH</div>
+        <div id="ptCoachMsg" style="font-size:13px;color:var(--text);line-height:1.55;font-weight:500;">Loading your plan...</div>
+        <div id="ptCoachSub" style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+      </div>
+    </div>
+    <div id="ptCoachActions" style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;"></div>
+  </div>
+
   <div class="section-label">Streaks</div>
   <div class="streaks-row" id="streaksRow">
     <div class="streak-box" id="streakLogging"><div class="streak-icon">🍽️</div><div class="streak-val zero" id="streakLoggingVal">0</div><div class="streak-lbl">Nutrition</div></div>
@@ -1380,12 +1417,14 @@ body{transition:background .3s,color .3s;}
 <!-- TRAIN -->
 <div class="view" id="view-train">
   <!-- Sport selector tabs -->
-  <div class="sport-tabs">
-    <div class="sport-tab active" onclick="switchSport('gym',this)">🏋️ Gym</div>
-    <div class="sport-tab" onclick="switchSport('ride',this)">🚴 Ride</div>
-    <div class="sport-tab" onclick="switchSport('run',this)">🏃 Run</div>
-    <div class="sport-tab" onclick="switchSport('swim',this)">🏊 Swim</div>
-    <div class="sport-tab" onclick="switchSport('log',this)">➕ Log</div>
+  <div class="sport-tabs" id="sportTabsRow">
+    <div class="sport-tab active" onclick="switchSport('gym',this)">Gym</div>
+    <div class="sport-tab" onclick="switchSport('run',this)">Run</div>
+    <div class="sport-tab" onclick="switchSport('ride',this)">Ride</div>
+    <div class="sport-tab" onclick="switchSport('swim',this)">Swim</div>
+    <div class="sport-tab" onclick="switchSport('row',this)">Row</div>
+    <div class="sport-tab" onclick="switchSport('mindBody',this)">Mind & Body</div>
+    <div class="sport-tab" onclick="switchSport('log',this)">+ Log</div>
   </div>
 
   <!-- GYM PANEL -->
@@ -1462,7 +1501,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-ride">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--exlog);">
-        <div class="ep-sport">🚴 Ride</div>
+        <div class="ep-sport">Ride</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Z1 Recovery</div><div class="zone-val">&lt;55% FTP</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Z2 Endurance</div><div class="zone-val">56–75% FTP</div></div>
@@ -1481,7 +1520,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-run">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--pull);">
-        <div class="ep-sport">🏃 Run</div>
+        <div class="ep-sport">Run</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Easy / Recovery</div><div class="zone-val">60–70% HR max</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Aerobic Base</div><div class="zone-val">70–80% HR max</div></div>
@@ -1500,7 +1539,7 @@ body{transition:background .3s,color .3s;}
   <div class="sport-panel" id="panel-swim">
     <div class="endurance-panel">
       <div class="ep-header" style="border-top-color:var(--blue);">
-        <div class="ep-sport">🏊 Swim</div>
+        <div class="ep-sport">Swim</div>
         <div class="ep-zones">
           <div class="zone-row"><div class="zone-dot" style="background:#60a5fa;"></div><div class="zone-name">Easy</div><div class="zone-val">Conversational pace</div></div>
           <div class="zone-row"><div class="zone-dot" style="background:#34d399;"></div><div class="zone-name">Aerobic</div><div class="zone-val">Steady · CSS +15s</div></div>
@@ -1510,6 +1549,99 @@ body{transition:background .3s,color .3s;}
       </div>
       <div class="section-label">Log This Swim</div>
       <div id="swimLogForm"></div>
+    </div>
+  </div>
+
+  <!-- ROW PANEL -->
+  <div class="sport-panel" id="panel-row">
+    <div class="pt-goal-banner" id="rowGoalBanner"></div>
+    <div class="section-label">Today's Session</div>
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--exlog);">Rowing</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Full body · Low impact · High output</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Est. Cal/hr</div>
+          <div id="rowCalDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--exlog);">—</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Duration (min)</label><input type="number" id="rowDuration" placeholder="30" min="1" max="180" style="width:100%;" oninput="calcRowCals()"></div>
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Distance (m)</label><input type="number" id="rowDistance" placeholder="5000" style="width:100%;" oninput="calcRowCals()"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Avg Split (mm:ss)</label><input type="text" id="rowSplit" placeholder="2:05" style="width:100%;"></div>
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Effort</label>
+          <select id="rowEffort" style="width:100%;">
+            <option>Easy</option><option selected>Moderate</option><option>Tempo</option><option>Hard</option><option>Max</option>
+          </select>
+        </div>
+      </div>
+      <div id="rowCalBanner" style="background:rgba(61,232,160,.08);border:0.5px solid rgba(61,232,160,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:none;">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--exlog);margin-bottom:2px;">Estimated Calories</div>
+        <div id="rowCalResult" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--exlog);">—</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">Based on your weight · <span id="rowCalNote"></span></div>
+      </div>
+      <button class="btn btn-ex btn-block" onclick="logRowSession()">Log Session</button>
+    </div>
+    <div class="section-label">Rowing Workouts</div>
+    <div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="startRowWorkout('steady')">
+      <div style="font-weight:500;margin-bottom:2px;">Steady State · 20–30 min</div>
+      <div style="font-size:11px;color:var(--muted);">2:10–2:20/500m pace. Aerobic base builder. Damper 3–4.</div>
+      <div style="margin-top:8px;display:flex;gap:5px;"><span class="pill">Low</span><span class="pill">Endurance</span></div>
+    </div>
+    <div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="startRowWorkout('intervals')">
+      <div style="font-weight:500;margin-bottom:2px;">Power Intervals · 6 × 500m</div>
+      <div style="font-size:11px;color:var(--muted);">Hard effort each 500m, 2 min rest between. Damper 6–7.</div>
+      <div style="margin-top:8px;display:flex;gap:5px;"><span class="pill">High</span><span class="pill">Power</span></div>
+    </div>
+    <div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="startRowWorkout('pyramid')">
+      <div style="font-weight:500;margin-bottom:2px;">Pyramid · 250–500–1000–500–250m</div>
+      <div style="font-size:11px;color:var(--muted);">Build to 1k then back down. Equal rest. Great for pace awareness.</div>
+      <div style="margin-top:8px;display:flex;gap:5px;"><span class="pill">Medium</span><span class="pill">Mixed</span></div>
+    </div>
+  </div>
+
+  <!-- MIND & BODY PANEL -->
+  <div class="sport-panel" id="panel-mindBody">
+    <div class="pt-goal-banner" id="mindBodyGoalBanner"></div>
+    <div class="section-label">Practice Type</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div class="mind-type-btn active" data-type="Yoga" onclick="selectMindType('Yoga',this)">
+        <div style="font-size:22px;margin-bottom:4px;">🧘</div>
+        <div style="font-size:12px;font-weight:500;">Yoga</div>
+      </div>
+      <div class="mind-type-btn" data-type="Pilates" onclick="selectMindType('Pilates',this)">
+        <div style="font-size:22px;margin-bottom:4px;">🤸</div>
+        <div style="font-size:12px;font-weight:500;">Pilates</div>
+      </div>
+      <div class="mind-type-btn" data-type="Mindfulness" onclick="selectMindType('Mindfulness',this)">
+        <div style="font-size:22px;margin-bottom:4px;">🌿</div>
+        <div style="font-size:12px;font-weight:500;">Mindfulness</div>
+      </div>
+      <div class="mind-type-btn" data-type="Stretch" onclick="selectMindType('Stretch',this)">
+        <div style="font-size:22px;margin-bottom:4px;">🙆</div>
+        <div style="font-size:12px;font-weight:500;">Mobility</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div id="mindTypeTitle" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--pull);margin-bottom:10px;">Yoga</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Duration (min)</label><input type="number" id="mindDuration" placeholder="45" min="5" max="180" style="width:100%;"></div>
+        <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Intensity</label>
+          <select id="mindIntensity" style="width:100%;">
+            <option>Gentle</option><option selected>Moderate</option><option>Vigorous</option>
+          </select>
+        </div>
+      </div>
+      <div><label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Notes / Focus</label><input type="text" id="mindNotes" placeholder="e.g. Hip opener flow, breathing work..." style="width:100%;"></div>
+      <div style="margin-top:12px;"><button class="btn btn-block" style="background:var(--pull);border-color:var(--pull);color:#0d0d0d;font-weight:600;" onclick="logMindBody()">Log Session</button></div>
+    </div>
+    <div class="section-label">Recovery Tip</div>
+    <div class="card" id="mindRecTip">
+      <div style="font-size:12px;color:var(--muted2);line-height:1.6;">Mind &amp; body work accelerates recovery between hard sessions. Even 10 minutes of breathing work reduces cortisol and improves HRV.</div>
     </div>
   </div>
 
@@ -2033,13 +2165,16 @@ const OB_STEPS=6;
 let obData={goals:[],experience:'',activity:'',age:'',sex:'',dietaryPrefs:[],currentWeight:'',targetWeight:''};
 let obStep=1;
 const GOALS=[
-  {id:'weight_loss',icon:'⚖️',label:'Weight Loss',sub:'Lose fat, improve body composition'},
+  {id:'weight_loss',icon:'⚖️',label:'Lose Weight',sub:'Reduce body fat, improve composition'},
   {id:'strength',icon:'💪',label:'Build Strength',sub:'Get stronger, add muscle mass'},
-  {id:'fitness',icon:'🏃',label:'Fitness & Endurance',sub:'Cardio, stamina, performance'},
-  {id:'health',icon:'❤️',label:'General Health',sub:'Feel better, live healthier'},
-  {id:'sport',icon:'🚴',label:'Sport Performance',sub:'Train for cycling, running, etc.'},
+  {id:'fitness',icon:'🏃',label:'Fitness & Endurance',sub:'Cardio base, stamina, performance'},
+  {id:'marathon',icon:'🏅',label:'Run a Marathon',sub:'26.2-mile race preparation'},
+  {id:'triathlon',icon:'🏁',label:'Triathlon',sub:'Swim, bike, run race training'},
+  {id:'health',icon:'❤️',label:'General Health',sub:'Feel better, live healthier, stay trim'},
+  {id:'sport',icon:'🎯',label:'Sport Performance',sub:'Train for a specific sport or event'},
   {id:'tone',icon:'✨',label:'Tone & Shape',sub:'Lean, defined physique'},
-  {id:'flexibility',icon:'🧘',label:'Flexibility',sub:'Mobility, movement quality'},
+  {id:'flexibility',icon:'🧘',label:'Flexibility & Mindfulness',sub:'Mobility, yoga, recovery focus'},
+  {id:'strength_end',icon:'🏋️',label:'Strength + Endurance',sub:'Hybrid athlete — strong and fit'},
 ];
 const DIET_PREFS=['No restrictions','Vegetarian','Vegan','Gluten-free','Dairy-free','Low carb','High protein','Halal','Kosher'];
 const ACTIVITY_OPTS=[
@@ -2167,7 +2302,7 @@ async function loadAllData(){
     setSyncStatus('ok');
     applyPrefs();updateDashboard();renderFoodLog();renderExerciseLog();renderWeightLog();initWater();updateStreaksAndAchievements();initStrava();loadApiKeyUI();
     renderFavourites();
-    loadAllExerciseHistory().then(()=>updateTrainingLoad());
+    loadAllExerciseHistory().then(()=>{ updateTrainingLoad(); setTimeout(renderPTCoach, 200); });
     refreshDateNav('fuel');refreshDateNav('progress');
   }catch(e){
     console.error('loadAllData error:',e);
@@ -2288,55 +2423,77 @@ function renderWeekVolume(containerId){
 }
 
 function calcTSS(entry){
-  // Simplified TSS: duration × effort multiplier
   const dur=parseInt(entry.duration)||0;
-  const effortMap={'Easy':0.3,'Moderate':0.55,'Hard':0.8,'Max':1.0};
+  if(dur===0)return 0;
+
+  // If calories present (from Strava/device), use as primary TSS signal
+  // Rule of thumb: 1 TSS ≈ 4-6 kcal for most activities
+  if(entry.cals && entry.cals > 0){
+    return Math.round(entry.cals / 4.5);
+  }
+
+  // If heart rate present, use HR-based intensity
+  if(entry.hr && entry.hr > 0){
+    // Karvonen-style: assume max HR ~185, resting ~55
+    const hrReserve = Math.max(0, Math.min(1, (entry.hr - 55) / 130));
+    return Math.round(dur * hrReserve * 0.9);
+  }
+
+  // Fallback: effort-based
+  const effortMap={
+    'Easy':0.25,'Recovery':0.2,'Moderate':0.55,'Tempo':0.75,
+    'Hard':0.85,'Max':1.0,'Race':1.1
+  };
   const ef=effortMap[entry.effort]||0.5;
-  // Distance bonus for endurance sports
-  const distBonus=entry.distance?(entry.distance*0.5):0;
-  return Math.round((dur*ef)+distBonus);
+  // Distance bonus for endurance sports (km-based)
+  const distBonus=entry.distance?(entry.distance*0.4):0;
+
+  // Sport multiplier — gym/strength is less aerobic stress
+  const type=(entry.type||'').toLowerCase();
+  const sportMult = (type.includes('weight') || type.includes('gym') || type.includes('strength') || type.includes('yoga') || type.includes('pilates')) ? 0.7 : 1.0;
+
+  return Math.round(((dur*ef)+distBonus)*sportMult);
 }
 
 function updateTrainingLoad(){
-  // Merge all exercise history
-  const allLogs=[...state.exerciseLog,...(state.allExerciseLog||[])];
-  const tssMap={};
-  allLogs.forEach(e=>{if(e.date)tssMap[e.date]=(tssMap[e.date]||0)+calcTSS(e);});
+  // Use buildTSSMap which properly deduplicates by ID
+  const tssMap = buildTSSMap();
 
-  // CTL = 42-day EWA, ATL = 7-day EWA — with 42-day preload for accuracy
-  const today=new Date();
-  const totalDays=84; // 42 preload + 42 display
-  const days=[];
-  for(let i=totalDays-1;i>=0;i--){
-    const dd=new Date(today);dd.setDate(dd.getDate()-i);
+  const today = new Date();
+  const totalDays = 84; // 42 preload + 42 display window
+  const days = [];
+  for(let i=totalDays-1; i>=0; i--){
+    const dd=new Date(today); dd.setDate(dd.getDate()-i);
     days.push(dd.toISOString().slice(0,10));
   }
 
-  let ctl=0,atl=0;
-  const ctlPoints=[],atlPoints=[];
+  let ctl=0, atl=0;
+  const ctlPoints=[], atlPoints=[];
   days.forEach((day,idx)=>{
-    const tss=tssMap[day]||0;
-    ctl=ctl+(tss-ctl)*(1/42);
-    atl=atl+(tss-atl)*(1/7);
-    if(idx>=42){ctlPoints.push(Math.round(ctl));atlPoints.push(Math.round(atl));}
+    const tss = tssMap[day]||0;
+    ctl = ctl + (tss-ctl)*(1/42);
+    atl = atl + (tss-atl)*(1/7);
+    if(idx>=42){ ctlPoints.push(Math.round(ctl)); atlPoints.push(Math.round(atl)); }
   });
-  const tsb=Math.round(ctl-atl);
+  const tsb = Math.round(ctl-atl);
 
-  // Update metric displays
+  // Update all metric displays (dash + progress views)
   ['CTL','ATL','TSB'].forEach((id,i)=>{
-    const val=[Math.round(ctl),Math.round(atl),tsb][i];
+    const val = [Math.round(ctl), Math.round(atl), tsb][i];
     ['dash','prog'].forEach(pfx=>{
-      const el=document.getElementById(pfx+id);
-      if(el)el.textContent=val;
+      const el = document.getElementById(pfx+id);
+      if(el) el.textContent = val;
     });
   });
 
-  // ── INSIGHTS ENGINE ──
-  renderTrainingInsight(Math.round(ctl),Math.round(atl),tsb,ctlPoints);
+  // Insights card + PT banners
+  renderTrainingInsight(Math.round(ctl), Math.round(atl), tsb, ctlPoints);
+  if(typeof updatePTBanners==='function') updatePTBanners();
+  if(typeof renderPTCoach==='function') renderPTCoach();
 
-  // Draw sparkline
-  drawLoadChart('loadChart',ctlPoints,atlPoints);
-  drawLoadChart('progressLoadChart',ctlPoints,atlPoints);
+  // Charts
+  drawLoadChart('loadChart', ctlPoints, atlPoints);
+  drawLoadChart('progressLoadChart', ctlPoints, atlPoints);
 }
 
 function renderTrainingInsight(ctl,atl,tsb,ctlPoints){
@@ -2474,14 +2631,16 @@ function saveEvent(){
 }
 
 // \u2550\u2550 SPORT TABS (TRAIN) \u2550\u2550
-function switchSport(sport,el){
-  document.querySelectorAll('.sport-tab').forEach(t=>t.classList.remove('active'));
+async function switchSport(s,el){
   document.querySelectorAll('.sport-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('panel-'+sport).classList.add('active');
-  if(sport==='ride')renderEnduranceWorkouts('ride');
-  if(sport==='run')renderEnduranceWorkouts('run');
-  if(sport==='log'){renderExerciseLog();initStrava();}
+  document.querySelectorAll('.sport-tab').forEach(t=>t.classList.remove('active'));
+  const panel=document.getElementById('panel-'+s);
+  if(panel)panel.classList.add('active');
+  if(el)el.classList.add('active');
+  // Update PT goal banners when switching sport
+  if(typeof updatePTBanners==='function')updatePTBanners();
+  // Update row cal estimate if switching to row
+  if(s==='row')calcRowCals();
 }
 
 function showGymSesh(id,el){
@@ -3586,15 +3745,18 @@ async function logStravaActivity(a) {
 
   // Map Strava types to your existing internal types
   const typeMap = {
-    Run: '🏃 Running',
-    Ride: '🚴 Cycling',
-    VirtualRide: '🚴 Cycling',
-    Walk: '⚡ Other',
-    Swim: '🏊 Swimming',
-    WeightTraining: '🏋️ Weights',
-    Workout: '🏋️ Weights',
-    Yoga: '⚡ Other',
-    Hike: '⚡ Other'
+    Run: 'Running', Ride: 'Cycling', VirtualRide: 'Cycling',
+    VirtualRun: 'Running', Walk: 'Walking', Hike: 'Walking',
+    Swim: 'Swimming', Rowing: 'Rowing', Kayaking: 'Rowing',
+    WeightTraining: 'Gym / Weights', Workout: 'Gym / Weights',
+    CrossFit: 'Gym / Weights', Yoga: 'Yoga', Pilates: 'Pilates',
+    Crossfit: 'Gym / Weights', EBikeRide: 'Cycling',
+    Soccer: 'Football', Tennis: 'Tennis', Golf: 'Golf',
+    Basketball: 'Basketball', Climbing: 'Climbing',
+    RockClimbing: 'Climbing', Boxing: 'Boxing',
+    StandUpPaddling: 'Other', Surfing: 'Other',
+    NordicSki: 'Other', AlpineSki: 'Other',
+    Triathlon: 'Triathlon', Default: 'Other',
   };
 
   const liftType = typeMap[a.type] || '⚡ Other';
@@ -3604,6 +3766,13 @@ async function logStravaActivity(a) {
   const date = a.start_date_local ? a.start_date_local.slice(0, 10) : todayKey();
   const hr = a.average_heartrate ? Math.round(a.average_heartrate) : null;
 
+  // Estimate calories if Strava didn't provide them
+  const wt = parseFloat(localStorage.getItem('lift_weight')) || 75;
+  const finalCals = (cals > 0) ? cals : estimateCalsBurned(liftType, mins, wt);
+  // Better effort mapping from HR zones
+  let effort = 'Moderate';
+  if(hr){ if(hr < 130) effort='Easy'; else if(hr < 150) effort='Moderate'; else if(hr < 165) effort='Hard'; else effort='Max'; }
+
   const entry = {
     user_id: currentUser.id,
     date,
@@ -3611,11 +3780,11 @@ async function logStravaActivity(a) {
     duration: mins,
     distance: km,
     hr,
-    effort: 'Moderate',
-    cals,
+    effort,
+    cals: finalCals,
     description: a.name || liftType,
     notes: 'Imported from Strava',
-    strava_id: String(a.id)   // IMPORTANT: enables duplicate protection + unique index
+    strava_id: String(a.id)
   };
 
   try {
@@ -3636,17 +3805,16 @@ async function logStravaActivity(a) {
       return;
     }
 
-    // Update local state only if it’s for today (your app only loads today into state.exerciseLog)
     if (data) {
-      if (date === todayKey()) state.exerciseLog.push(data);
+      if (!state.allExerciseLog) state.allExerciseLog = [];
+      if (!state.allExerciseLog.find(x => x.id === data.id)) state.allExerciseLog.push(data);
+      if (date === todayKey() && !state.exerciseLog.find(x => x.id === data.id)) state.exerciseLog.push(data);
     }
-
     setSyncStatus('ok');
     renderExerciseLog();
     updateOverview();
     updateStreaksAndAchievements();
-
-    // Refresh import list (will now show ✓ logged)
+    updateTrainingLoad();
     importFromStrava();
 
   } catch (e) {
@@ -3761,6 +3929,37 @@ async function loadAllExerciseHistory(){
     state.allExerciseLog=data||[];
   }catch(e){state.allExerciseLog=[];}
 }
+// ── SHARED EXERCISE SAVE HELPER ──
+async function addExerciseEntry(fields){
+  if(!currentUser) throw new Error('Not signed in');
+  const entry = {
+    user_id: currentUser.id,
+    date: todayKey(),
+    type: fields.type || 'Other',
+    duration: parseInt(fields.duration)||0,
+    distance: fields.distance ? parseFloat(fields.distance) : null,
+    hr: fields.hr ? parseInt(fields.hr) : null,
+    effort: fields.effort || 'Moderate',
+    cals: parseInt(fields.cals)||0,
+    description: fields.description || fields.type,
+    notes: fields.notes || '',
+  };
+  setSyncStatus('syncing');
+  const{data,error}=await sb.from('exercise_log').insert(entry).select().single();
+  if(error) throw error;
+  if(data){
+    state.exerciseLog.push(data);
+    if(!state.allExerciseLog) state.allExerciseLog=[];
+    state.allExerciseLog.push(data);
+  }
+  setSyncStatus('ok');
+  renderExerciseLog();
+  updateOverview();
+  updateStreaksAndAchievements();
+  updateTrainingLoad();
+  return data;
+}
+
 function buildTSSMap(){
   const all=[...(state.allExerciseLog||[])];
   state.exerciseLog.forEach(e=>{if(!all.find(x=>x.id===e.id))all.push(e);});
@@ -3817,6 +4016,300 @@ async function saveFoodAsFavourite(){
   showWaterToast('\u2605 Added to favourites!');
 }
 
+
+
+// ══════════════════════════════════════════════════════
+// PERSONAL TRAINER ENGINE
+// Goal-based guidance, cal estimation, sport coaching
+// ══════════════════════════════════════════════════════
+
+// MET values for calorie estimation (used when device cal not available)
+const MET_VALUES = {
+  'Running': 9.8, 'Cycling': 7.5, 'Swimming': 8.0, 'Rowing': 8.5,
+  'Weights': 4.5, 'HIIT': 8.0, 'Yoga': 3.0, 'Pilates': 3.5,
+  'Mindfulness': 1.5, 'Stretch': 2.5, 'Walk': 3.8, 'Other': 5.0,
+};
+
+function estimateCalsBurned(activityType, durationMin, userWeightKg) {
+  const wt = userWeightKg || parseFloat(localStorage.getItem('lift_weight')) || 75;
+  const typeKey = Object.keys(MET_VALUES).find(k => activityType.toLowerCase().includes(k.toLowerCase())) || 'Other';
+  const met = MET_VALUES[typeKey];
+  return Math.round(met * wt * (durationMin / 60));
+}
+
+// ── ROW CALCULATOR ──
+async function calcRowCals() {
+  const dur = parseInt(document.getElementById('rowDuration')?.value) || 0;
+  const dist = parseInt(document.getElementById('rowDistance')?.value) || 0;
+  const banner = document.getElementById('rowCalBanner');
+  const display = document.getElementById('rowCalDisplay');
+  if (!dur && !dist) { if(banner)banner.style.display='none'; return; }
+
+  const wt = parseFloat(localStorage.getItem('lift_weight')) || 75;
+  // Rowing MET varies with intensity — use split if available
+  const split = document.getElementById('rowSplit')?.value || '';
+  let met = 8.5;
+  if (split) {
+    const parts = split.split(':');
+    const splitSec = (parseInt(parts[0])||2)*60 + (parseInt(parts[1])||5);
+    // Faster split = higher intensity
+    if (splitSec < 105) met = 10.5;      // sub 1:45
+    else if (splitSec < 120) met = 9.5;  // sub 2:00
+    else if (splitSec < 135) met = 8.5;  // sub 2:15
+    else met = 7.0;
+  }
+  const cals = Math.round(met * wt * (dur / 60));
+  const calsPerHr = Math.round(met * wt);
+
+  if(display) display.textContent = calsPerHr;
+  if(banner) {
+    banner.style.display = 'block';
+    const res = document.getElementById('rowCalResult');
+    const note = document.getElementById('rowCalNote');
+    if(res) res.textContent = cals + ' kcal';
+    if(note) note.textContent = dur > 0 ? dur + ' min at ' + (split || 'moderate pace') : dist + 'm';
+  }
+}
+
+async function logRowSession() {
+  const dur = parseInt(document.getElementById('rowDuration')?.value);
+  const dist = parseInt(document.getElementById('rowDistance')?.value);
+  if (!dur && !dist) { alert('Enter duration or distance'); return; }
+  const effort = document.getElementById('rowEffort')?.value || 'Moderate';
+  const wt = parseFloat(localStorage.getItem('lift_weight')) || 75;
+  const cals = estimateCalsBurned('Rowing', dur || 20, wt);
+  const km = dist ? dist / 1000 : null;
+
+  try {
+    await addExerciseEntry({
+      type: 'Rowing', duration: dur || 20, distance: km,
+      effort, cals, description: km ? km.toFixed(1)+'km row' : dur+'min row',
+      notes: document.getElementById('rowSplit')?.value ? '@ '+document.getElementById('rowSplit').value+'/500m' : ''
+    });
+    showWaterToast('Row logged — '+cals+' kcal');
+    document.getElementById('rowDuration').value='';
+    document.getElementById('rowDistance').value='';
+    document.getElementById('rowSplit').value='';
+    document.getElementById('rowCalBanner').style.display='none';
+  } catch(e){ alert('Could not log: '+e.message); }
+}
+
+// ── MIND & BODY ──
+let _selectedMindType = 'Yoga';
+
+function selectMindType(type, el) {
+  _selectedMindType = type;
+  document.querySelectorAll('.mind-type-btn').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const title = document.getElementById('mindTypeTitle');
+  if(title) {
+    const colorMap = { Yoga:'var(--pull)', Pilates:'var(--blue)', Mindfulness:'var(--full)', Stretch:'var(--accent)' };
+    title.textContent = type;
+    title.style.color = colorMap[type] || 'var(--pull)';
+  }
+  // Update recovery tip
+  const tips = {
+    Yoga: 'Yoga improves flexibility, reduces cortisol and accelerates recovery. Even 20 minutes post-workout reduces DOMS significantly.',
+    Pilates: 'Pilates builds core stability and postural strength — the foundation of every sport. 3×/week delivers measurable force transfer improvements.',
+    Mindfulness: 'Regular mindfulness practice improves sleep quality, HRV, and stress response — all key performance markers for athletes.',
+    Stretch: 'Dynamic mobility before, static stretching after. Target hip flexors and thoracic spine for most sports.',
+  };
+  const tip = document.getElementById('mindRecTip');
+  if(tip) tip.innerHTML = '<div style="font-size:12px;color:var(--muted2);line-height:1.6;">'+tips[type]+'</div>';
+}
+
+async function logMindBody() {
+  const dur = parseInt(document.getElementById('mindDuration')?.value);
+  if (!dur || dur < 1) { alert('Enter a duration'); return; }
+  const intensity = document.getElementById('mindIntensity')?.value || 'Moderate';
+  const notes = document.getElementById('mindNotes')?.value || '';
+  const wt = parseFloat(localStorage.getItem('lift_weight')) || 75;
+  const cals = estimateCalsBurned(_selectedMindType, dur, wt);
+  const effortMap = { 'Gentle':'Easy', 'Moderate':'Moderate', 'Vigorous':'Hard' };
+
+  try {
+    await addExerciseEntry({
+      type: _selectedMindType, duration: dur,
+      effort: effortMap[intensity]||'Moderate', cals,
+      description: intensity + ' ' + _selectedMindType + (notes ? ' — '+notes : ''),
+      notes
+    });
+    showWaterToast(_selectedMindType + ' logged — ' + dur + 'min');
+    document.getElementById('mindDuration').value='';
+    document.getElementById('mindNotes').value='';
+  } catch(e){ alert('Could not log: '+e.message); }
+}
+
+// ── PT GOAL BANNER ENGINE ──
+function updatePTBanners() {
+  const goals = JSON.parse(localStorage.getItem('lift_goals')||'[]');
+  const ctl = parseFloat(document.getElementById('dashCTL')?.textContent)||0;
+  const tsb = parseFloat(document.getElementById('dashTSB')?.textContent)||0;
+  const todayType = document.getElementById('dashSportTag')?.textContent||'';
+
+  const banners = {
+    row: document.getElementById('rowGoalBanner'),
+    mindBody: document.getElementById('mindBodyGoalBanner'),
+  };
+
+  // Build contextual PT message based on goal + training state
+  const messages = {};
+
+  if(goals.includes('fitness') || goals.includes('sport')) {
+    if(tsb < -10) messages.row = '<strong>Recovery Row Recommended</strong>Your load is high (TSB '+Math.round(tsb)+'). Do an easy 20-min steady state at low damper — flushing without adding stress.';
+    else if(tsb > 10) messages.row = '<strong>Go for it today</strong>You are fresh (TSB +'+Math.round(tsb)+'). A hard interval session will build maximum aerobic power.';
+    else messages.row = '<strong>Steady building</strong>Good training phase. A 30-min moderate row will add useful aerobic load without overreaching.';
+  }
+
+  if(goals.includes('flexibility') || goals.includes('health')) {
+    messages.mindBody = '<strong>Flexibility Goal Active</strong>You have a flexibility goal set. 3 sessions/week is the minimum effective dose — aim for today.';
+  } else if(tsb < -5) {
+    messages.mindBody = '<strong>Recovery Priority</strong>Your training load is elevated. A yoga or mobility session today will accelerate recovery without adding fatigue.';
+  }
+
+  Object.entries(banners).forEach(([key, el]) => {
+    if (!el) return;
+    if (messages[key]) {
+      el.innerHTML = messages[key];
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show');
+    }
+  });
+}
+
+// ── EXPANDED SPORT TYPE MAP (for log quick-add) ──
+const SPORT_TYPES = [
+  'Running','Cycling','Swimming','Rowing','Gym / Weights',
+  'HIIT','Yoga','Pilates','Mindfulness','Mobility / Stretch',
+  'Walking','Football','Tennis','Golf','Basketball',
+  'Climbing','Boxing','Crossfit','Triathlon','Other',
+];
+
+// ── CALORIE ESTIMATION for activities missing burn data ──
+function enrichActivityWithCals(entry) {
+  if (entry.cals && entry.cals > 0) return entry; // already has cals
+  const wt = parseFloat(localStorage.getItem('lift_weight')) || 75;
+  const dur = parseInt(entry.duration) || 0;
+  if (!dur) return entry;
+  const cals = estimateCalsBurned(entry.type || 'Other', dur, wt);
+  return { ...entry, cals, _cals_estimated: true };
+}
+
+
+
+// ══════════════════════════════════════════════════════
+// PT COACH ENGINE — Daily personalised guidance
+// ══════════════════════════════════════════════════════
+function renderPTCoach(){
+  const msgEl  = document.getElementById('ptCoachMsg');
+  const subEl  = document.getElementById('ptCoachSub');
+  const actEl  = document.getElementById('ptCoachActions');
+  if(!msgEl) return;
+
+  // Pull context
+  const goals  = JSON.parse(localStorage.getItem('lift_goals')||'[]');
+  const ctl    = parseFloat(document.getElementById('dashCTL')?.textContent)||0;
+  const atl    = parseFloat(document.getElementById('dashATL')?.textContent)||0;
+  const tsb    = parseFloat(document.getElementById('dashTSB')?.textContent)||0;
+  const wt     = parseFloat(localStorage.getItem('lift_weight'))||75;
+  const today  = new Date();
+  const dow    = today.getDay(); // 0=Sun, 6=Sat
+  const todayLogs = state.exerciseLog || [];
+  const alreadyTrained = todayLogs.length > 0;
+  const totalCalsBurned = todayLogs.reduce((a,e)=>a+(e.cals||0),0);
+
+  // ── Determine recommended session type ──
+  let sessionType = 'rest';
+  let msg = '', sub = '', actions = [];
+
+  const hasEnduranceGoal  = goals.some(g=>['fitness','marathon','triathlon','sport'].includes(g));
+  const hasStrengthGoal   = goals.some(g=>['strength','tone','strength_end'].includes(g));
+  const hasFlexGoal       = goals.some(g=>['flexibility','health'].includes(g));
+  const hasWeightLossGoal = goals.includes('weight_loss');
+
+  // Fatigue state
+  const veryFresh  = tsb > 15;
+  const fresh      = tsb > 5;
+  const balanced   = tsb >= -5;
+  const fatigued   = tsb < -10;
+  const veryTired  = tsb < -20;
+
+  if(alreadyTrained){
+    const last = todayLogs[todayLogs.length-1];
+    msg = 'Great work today';
+    sub = `${last.description||last.type} logged — ${totalCalsBurned} kcal burned. Rest and recover well tonight.`;
+    actions = [];
+    // Still suggest stretch if hard session
+    if((last.effort==='Hard'||last.effort==='Max') && !todayLogs.find(l=>l.type==='Yoga'||l.type==='Stretch')){
+      actions = [{label:'Add Recovery Stretch', view:'train', sport:'mindBody'}];
+    }
+  } else if(veryTired){
+    msg = 'Rest day — your body is telling you something';
+    sub = `TSB is ${Math.round(tsb)}, well below zero. Active recovery only — a 20-min walk or gentle yoga will help without adding fatigue.`;
+    sessionType = 'recovery';
+    actions = [{label:'Open Mind & Body', view:'train', sport:'mindBody'}];
+  } else if(fatigued){
+    msg = 'Keep it easy today';
+    sub = `Your accumulated load (TSB ${Math.round(tsb)}) is elevated. An easy aerobic session will help flush legs without digging deeper.`;
+    sessionType = 'easy';
+    if(hasEnduranceGoal) actions = [{label:'Easy Run', view:'train', sport:'run'},{label:'Gentle Ride', view:'train', sport:'ride'}];
+    else actions = [{label:'Mind & Body', view:'train', sport:'mindBody'}];
+  } else if(veryFresh && hasEnduranceGoal){
+    msg = 'You are primed — go hard today';
+    sub = `Excellent freshness (TSB +${Math.round(tsb)}). This is the day for a quality session — tempo run, intervals, or a long ride will produce your best training adaptation.`;
+    sessionType = 'hard';
+    if(goals.includes('marathon')) actions = [{label:'Tempo Run', view:'train', sport:'run'},{label:'Track Session', view:'train', sport:'run'}];
+    else if(goals.includes('triathlon')) actions = [{label:'Bike Intervals', view:'train', sport:'ride'},{label:'Open Water Swim', view:'train', sport:'swim'}];
+    else actions = [{label:'Hard Ride', view:'train', sport:'ride'},{label:'Run Intervals', view:'train', sport:'run'}];
+  } else if(fresh && hasStrengthGoal){
+    msg = 'Strength day — you have the energy';
+    sub = `Good freshness (TSB +${Math.round(tsb)}). Your muscles are recovered. Push hard in the gym — progressive overload today.`;
+    actions = [{label:'Open Gym', view:'train', sport:'gym'}];
+  } else if(dow===0||dow===6){
+    // Weekend
+    msg = hasEnduranceGoal ? 'Long session day' : 'Active weekend — make it count';
+    sub = hasEnduranceGoal
+      ? 'Weekends are for long aerobic work. Build your base — aim for 60–90 min at easy to moderate effort.'
+      : 'A weekend workout sets your energy levels for the week. Even 30 minutes makes a difference.';
+    if(hasEnduranceGoal) actions=[{label:'Long Run', view:'train', sport:'run'},{label:'Long Ride', view:'train', sport:'ride'}];
+    else actions=[{label:'Gym Session', view:'train', sport:'gym'},{label:'Swim', view:'train', sport:'swim'}];
+  } else {
+    // Standard day
+    const dayPlan = {
+      1: hasStrengthGoal ? ['Push Day','Upper body push — chest, shoulders, triceps.','gym'] : ['Run Day','A solid aerobic run today builds endurance base.','run'],
+      2: hasEnduranceGoal ? ['Bike or Swim','Cross-train today to add aerobic load without impact.','ride'] : ['Pull Day','Back, biceps, rear delts — pull movements today.','gym'],
+      3: ['Mid-Week Quality','Halfway through — a quality session now pays dividends.', hasEnduranceGoal ? 'run' : 'gym'],
+      4: ['Full Body / Row','Compound movements or rowing — highly efficient training.', hasStrengthGoal ? 'gym' : 'row'],
+      5: hasFlexGoal ? ['Yoga & Recovery','End the week with a yoga or mobility session.','mindBody'] : ['Friday Push','End the week strong. One more quality session before the weekend.','gym'],
+    };
+    const plan = dayPlan[dow];
+    if(plan){
+      msg = plan[0];
+      sub = plan[1];
+      actions = [{label:`Open ${plan[0].split(' ')[0]}`, view:'train', sport:plan[2]}];
+    } else {
+      msg = 'Keep moving today';
+      sub = 'Any activity — even a 30-minute walk — is better than nothing. Consistency compounds.';
+    }
+    // Add weight loss nudge
+    if(hasWeightLossGoal && ctl>0){
+      const weeklyBurn = Math.round(ctl * 60 * 0.8); // rough kcal/week from training load
+      sub += ` At your current training load, you are burning ~${weeklyBurn} kcal/week through exercise.`;
+    }
+  }
+
+  msgEl.textContent = msg;
+  if(subEl) subEl.textContent = sub;
+
+  if(actEl){
+    actEl.innerHTML = actions.map(a=>`
+      <button class="btn" style="font-size:11px;padding:7px 13px;background:var(--accent-dim);border-color:rgba(200,255,0,.3);color:var(--accent);font-weight:500;"
+        onclick="showView('${a.view}');setTimeout(()=>{ const tab=document.querySelector('.sport-tab[onclick*=\'${a.sport}\']'); if(tab){tab.click();}},100);">
+        ${a.label}
+      </button>`).join('');
+  }
+}
 
 // KEYBOARD
 document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
